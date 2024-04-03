@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Login</title>
+</head>
+<body>
+  <h1>Welcome to the Hospital Management System</h1>
+  <!-- <form action="/login" method="POST">
+    <label for="role">Choose your role:</label>
+    <select name="role" id="role">
+      <option value="patient">Patient</option>
+      <option value="admin">Admin</option>
+      <option value="doctor">Doctor</option>
+      <option value="nurse">Nurse</option>
+    </select>
+    <button type="submit">Login</button>
+  </form> -->
+  <form id="loginForm" action="/login_patient" method="POST">
+    <label for="username">Username:</label><br>
+    <input type="text" id="username" name="username"><br><br>
+    <label for="password">Password:</label><br>
+    <input type="password" id="password" name="password"><br><br>
+    <label for="role">Role:</label><br>
+    
+    <br><br>
+    <input type="submit" value="Submit">
+  </form>
+</body>
+</html>

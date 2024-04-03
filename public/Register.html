@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account</title>
+  <link rel="stylesheet" href="/stylesheets/Register.css">
+</head>
+<body>
+  <header class="app-bar">
+    <a href="/"><h3>HMS</h3></a>
+  </header>
+  <div class="container">
+    <div class="form-container">
+      <hr><hr><hr><hr>
+      <h3>Patient's registration form:</h3>
+      <form action="/register_patient" method="post" onsubmit="return validateForm()">
+        <label for="firstName">First Name:</label>
+        <input type="text" id="firstName" name="firstName" required pattern="[a-zA-Z]+" placeholder="First name">
+        <label for="lastName">Last Name:</label>
+        <input type="text" id="lastName" name="lastName" required pattern="[a-zA-Z]+" placeholder="Last name">
+        <label for="gender">Gender:</label>
+        <input type="text" id="gender" name="gender" required placeholder="Female or Male">
+        <label for="conditions">Medical History - Conditions:</label>
+        <input type="text" id="conditions" name="conditions" placeholder="Conditions">
+        <label for="surgeries">Medical History - Surgeries:</label>
+        <input type="text" id="surgeries" name="surgeries" placeholder="Surgeries">
+        <label for="medications">Medical History - Medications:</label>
+        <input type="text" id="medications" name="medications" placeholder="Medications">
+        <label for="address">Address:</label>
+        <input type="text" id="address" name="address" required placeholder="Address">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required placeholder="Email">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password"  placeholder="Password">
+        <button type="reset" class="cancel">Cancel</button>
+        <button type="submit" class="signup">Sign Up</button>
+      </form>
+      <div align="center" style="margin-top: 20px;">
+        <p>Are you a doctor?</p>
+        <a href="/MakeDoc" style="text-decoration: none;"><button class="signup">I'm a doctor</button></a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function validateForm() {
+      // You can add your validation logic here
+      return true; // Return true to submit the form, false to prevent submission
+    }
+  </script>
+</body>
+</html>
