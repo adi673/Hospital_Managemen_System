@@ -122,16 +122,6 @@ router.get('/dashboard_patient', (req, res) =>{
   
 });
 
-router.post('/login_doctor', passport.authenticate("doctor",{
-  successRedirect:'/dashboard_doctor',
-  failureRedirect: "/",
-  
-}) , function(req, res){ })
-
-router.get('/dashboard_doctor', (req, res) =>{
-  res.send('Doctror Dashboard');
-});
-
 router.get('/viewMedicalHistory', (req, res) =>{
   var email_id = req.query.email;   //check this is working or not without JsonStringify
   console.log(email_id);
@@ -148,24 +138,65 @@ router.get('/viewMedicalHistory', (req, res) =>{
  });
 });
 
-router.get('/viewAppointment',(req,res)=>{  //added today
+router.get('/viewAppointment',(req,res)=>{  //added today  04/04/2024
   var email_id=req.query.email_id;
   console.log(email_id)
 
 })
 
-router.get('/scheduleAppointment',(req,res)=>{  //added today
+router.get('/scheduleAppointment',(req,res)=>{  //added today 04/04/2024
   var email_id=req.query.email_id;
   console.log(email_id)
 })
 
-router.get('/settings', (req,res)=>{   //added today
+
+router.post('/login_doctor', passport.authenticate("doctor",{   //added today 04/04/2024
+  successRedirect:'',
+  failureRedirect: "/",
+  
+}) , function(req, res){ 
+  var email = req.body.username;
+  var password = req.body.password;
+  console.log(email);
+  console.log(password);
+  const dataToPass = { email_id: email};
+  console.log(dataToPass);
+ res.redirect(`/dashboard_doctor?data=${encodeURIComponent(JSON.stringify(dataToPass))}`);
+})
+
+router.get('/dashboard_doctor', (req, res) =>{            //added today 04/04/2024
+  const passedData = JSON.parse(decodeURIComponent(req.query.data));
+  const email_d = passedData.email_id;
+    // console.log(email);
+    // res.send(email);
+    const query = 'SELECT name FROM doctor WHERE email = ? ';
+    db.query(query, [email_d], (err, results) => {
+      if (err) { return done(err); }
+      console.log(results[0].name);
+      res.render('DOC_home', {name: results[0].name, email: email_d})
+    });
+  // res.send('Doctror Dashboard');
+});
+
+router.get('/viewAppointments', (req,res)=>{                //added today 04/04/2024
+  var email_id = req.query.email;   //check this is working or not without JsonStringify
+  console.log(email_id);
+});
+
+
+router.get('/viewPatients?email', (req,res)=>{              //added today 04/04/2024
+  var email_id = req.query.email;   //check this is working or not without JsonStringify
+  console.log(email_id);
+});
+
+
+router.get('/settings', (req,res)=>{   //added today 04/04/2024
   var email_id=req.query.email_id;
   console.log(email_id)
   res.render('settings_page', {email: email_id} );
 })
 
-router.post('/changePassword', (req,res)=>{  //added today
+router.post('/changePassword', (req,res)=>{  //added today 04/04/2024
   var email_id=req.query.email;     //check this works or not on passing it form because of post method
   var old_pass=req.body.oldPassword;
   var new_pass=req.body.newPassword;
@@ -193,6 +224,15 @@ router.post('/changePassword', (req,res)=>{  //added today
   });  
 });
 
+
+router.get('/signout',(req,res)=>{  //added today 04/04/2024
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Error destroying session:', err);
+    }
+    res.redirect('/'); // Redirect to the login page after signout
+  });
+})
 
 // function isLoggedIn(req, res, next){
 //   if(req.isAuthenticated()){
