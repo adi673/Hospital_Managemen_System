@@ -129,13 +129,21 @@ router.get('/viewMedicalHistory', (req, res) =>{
   db.query(query, [email_id], (error, results) => {
     console.log("result",results);
     if (error) {
-      // Handle error
       console.error('Error fetching medical history:', error);
       res.status(500).send('Error fetching medical history');
     } else {
-      // Render a webpage to display the medical history data
-      // res.render('medicalHistory', { medicalHistory: results });
-      res.send(results);
+      const query2 = 'SELECT date, doctor, concerns, symptoms, diagnosis, prescription FROM Appointment A INNER JOIN (SELECT * FROM PatientsAttendAppointments  NATURAL JOIN Diagnose  WHERE patient = ?) AS B ON A.id = B.appt;';
+      db.query(query2, [email_id], (error, results2) => {
+        console.log("result2",results2);
+        if (error) {
+          // Handle error
+          console.error('Error fetching appointments:', error);
+          res.status(500).send('Error fetching appointments');
+        } else {
+          res.render('viewOneHistory', { medicalHistory: results, appointments: results2 });
+        }
+      });
+
     }
  });
 });
@@ -151,6 +159,43 @@ router.get('/scheduleAppointment',(req,res)=>{  //added today 04/04/2024
   console.log(email_id)
 })
 
+router.get('/Patient_settings', (req,res)=>{   //added today 04/04/2024
+  var email_id=req.query.email;
+  console.log("setting",email_id)
+  res.render('settings_patient', {email: email_id} );
+})
+
+router.post('/changePasswordPatient', (req,res)=>{  //added today 04/04/2024
+  console.log("Requesting DB From")
+  var email_id=req.query.email;     //check this works or not on passing it form because of post method
+  var old_pass=req.body.oldPassword;
+  var new_pass=req.body.newPassword;
+  console.log("changePass",email_id,old_pass,new_pass);
+  const check_old_pass="SELECT * FROM patient WHERE email=? AND password = ?";
+  const put_new_pass="UPDATE patient SET password = ? WHERE password = ?"
+  console.log("Requesting DB")
+  db.query(check_old_pass, [email_id,old_pass], (err, rows) =>{
+    if (err) {
+      console.error('Error:', err);
+      return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+
+    if (rows.length === 0) {
+      return res.status(401).json({ success: false, message: 'Incorrect old password' });
+    }
+
+    db.query(put_new_pass, [new_pass,old_pass], (err) => {
+      if (err) {
+        console.error('Error:', err);
+        return res.status(500).json({ success: false, message: 'Internal server error' });
+      }
+      //res.redirect('/'); 
+      // Redirect to login page on success  AND add flash mesage of sucess and send msg you will be redirected to login page in 3sec
+      res.sendFile(path.join(__dirname, '../public/patient_login.html'));
+      // res.json({ success: true, message: 'Password updated successfully' });
+    })
+  });  
+});
 
 router.post('/login_doctor', passport.authenticate("doctor",{   //added today 04/04/2024
   successRedirect:'',
@@ -191,21 +236,20 @@ router.get('/viewPatients?email', (req,res)=>{              //added today 04/04/
   console.log(email_id);
 });
 
-
-router.get('/settings', (req,res)=>{   //added today 04/04/2024
+router.get('/Doc_settings', (req,res)=>{   //added today 04/04/2024
   var email_id=req.query.email;
   console.log("setting",email_id)
-  res.render('settings_page', {email: email_id} );
+  res.render('settings_doc', {email: email_id} );
 })
 
-router.post('/changePassword', (req,res)=>{  //added today 04/04/2024
+router.post('/changePasswordDoc', (req,res)=>{  //added today 04/04/2024
   console.log("Requesting DB From")
   var email_id=req.query.email;     //check this works or not on passing it form because of post method
   var old_pass=req.body.oldPassword;
   var new_pass=req.body.newPassword;
   console.log("changePass",email_id,old_pass,new_pass);
-  const check_old_pass="SELECT * FROM patient WHERE email=? AND password = ?";
-  const put_new_pass="UPDATE patient SET password = ? WHERE password = ?"
+  const check_old_pass="SELECT * FROM doctor WHERE email=? AND password = ?";
+  const put_new_pass="UPDATE doctor SET password = ? WHERE password = ?"
   console.log("Requesting DB")
   db.query(check_old_pass, [email_id,old_pass], (err, rows) =>{
     if (err) {
@@ -224,11 +268,17 @@ router.post('/changePassword', (req,res)=>{  //added today 04/04/2024
       }
       //res.redirect('/'); 
       // Redirect to login page on success  AND add flash mesage of sucess and send msg you will be redirected to login page in 3sec
-      res.sendFile(path.join(__dirname, '../public/doctor_login.html'));
+      res.sendFile(path.join(__dirname, '../public/patient_login.html'));
       // res.json({ success: true, message: 'Password updated successfully' });
     })
   });  
 });
+
+
+
+
+
+
 
 
 router.get('/signout',(req,res)=>{  //added today 04/04/2024    working perfect make it separate for doctor and patient
@@ -239,6 +289,11 @@ router.get('/signout',(req,res)=>{  //added today 04/04/2024    working perfect 
     res.send("logged out") // Redirect to the login page after signout
   });
 })
+
+router.get('/gobackPatientDashboard',(req,res)=>{  //added today 04/04/2024 
+  var email_id=req.query.email;
+  res.redirect(`/dashboard_patient?data=${encodeURIComponent(JSON.stringify({email_id:email_id}))}`);
+});
 
 // function isLoggedIn(req, res, next){
 //   if(req.isAuthenticated()){

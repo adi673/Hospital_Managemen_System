@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HMS Settings</title>
+    <link rel="stylesheet" href="/stylesheets/Settings.css">
+</head>">
+</head>
+<body>
+    <header class="app-bar">
+        <a href="/" style="color: inherit; text-decoration: inherit;">
+            <h1>HMS</h1>
+        </a>
+    </header>
+    <div class="main-container">
+        <h3>Password Change <%= email %> </h3>  <!-- remove email later. it is just for testing -->
+        <form id="password-change-form" action="changePasswordPatient?email=<%= email %>" method="post">
+
+            <label for="oldPassword">Old password</label>
+            <input type="password" id="oldPassword" name="oldPassword" required><br>
+            <label for="newPassword">New password</label>
+            <input type="password" id="newPassword" name="newPassword" required><br>
+            <button type="submit" id="changePasswordBtn">Change Password</button>
+        </form>
+    </div>
+    
+</body>
+</html>

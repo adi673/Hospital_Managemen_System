@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HMS</title>
+    <style>
+         body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .main-header {
+            background-color: black;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .panel {
+            background-color: #f4f4f4;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .panel h2 {
+            margin-top: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        strong {
+            font-weight: bold;
+        }
+        hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 20px 0;
+        }
+        .back-button {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .back-button a {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .back-button a:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <h1>HMS</h1>
+    </header>
+    <div class="container">
+        <div class="panel">
+            <h2>Patient Information</h2>
+            <table>
+                <tbody>
+                    <% medicalHistory.forEach(entry => { %>
+                        <tr>
+                            <th>Name</th>
+                            <td><%= entry.name %></td>
+                            <th>Email</th>
+                            <td><%= entry.email %></td>
+                        </tr>
+                        <tr>
+                            <th>Gender</th>
+                            <td><%= entry.gender %></td>
+                            <th>Address</th>
+                            <td><%= entry.address %></td>
+                        </tr>
+                        <tr>
+                            <th>Conditions</th>
+                            <td colspan="3"><%= entry.conditions %></td>
+                        </tr>
+                        <tr>
+                            <th>Surgeries</th>
+                            <td colspan="3"><%= entry.surgeries %></td>
+                        </tr>
+                        <tr>
+                            <th>Medications</th>
+                            <td colspan="3"><%= entry.medication %></td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+        <hr>
+        <div class="panel">
+            <h2>Doctor's Visit</h2>
+            <table>
+                <tbody>
+                    <% appointments.forEach(entry => { %>
+                        <tr>
+                            <th>Date</th>
+                            <td><%= entry.date %></td>
+                            <th>Doctor</th>
+                            <td><%= entry.doctor %></td>
+                        </tr>
+                        <tr>
+                            <th>Concerns</th>
+                            <td><%= entry.concerns %></td>
+                            <th>Symptoms</th>
+                            <td><%= entry.symptoms %></td>
+                        </tr>
+                        <tr>
+                            <th>Diagnosis</th>
+                            <td colspan="3"><%= entry.diagnosis %></td>
+                        </tr>
+                        <tr>
+                            <th>Prescription</th>
+                            <td colspan="3"><%= entry.prescription %></td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="back-button">
+        <!-- <a id="dashboardLink" href="#">Go Back</a> -->
+    </div>
+    <!-- <script>
+        // Assuming dataToPass is an object containing the data you want to pass
+        const dataToPass = {
+            email_id: '<%= medicalHistory.email %>',
+            
+            // Add more key-value pairs as needed
+        };
+
+        // Construct the URL with data encoded as a query parameter
+        const url = `/dashboard_patient?data=${encodeURIComponent(JSON.stringify(dataToPass))}`;
+
+        // Get the anchor element by its ID
+        const dashboardLink = document.getElementById('dashboardLink');
+
+        // Set the href attribute of the anchor element
+        dashboardLink.href = url;
+        
+        // Block browser's back button
+        // history.pushState(null, null, location.href);
+        // window.onpopstate = function () {
+        //     history.go(1);
+        // };
+    </script> -->
+</body>
+</html>
