@@ -7,6 +7,7 @@ const passport = require('passport');
 const authController = require('../controllers/authController');
 const db = require('../models/db');
 const e = require('express');
+const res = require('express/lib/response');
 // Middleware
 // app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -146,6 +147,23 @@ router.get('/viewMedicalHistory', (req, res) =>{
     }
  });
 });
+
+router.get('/viewAppointment',(req,res)=>{
+  var email_id=req.query.email_id;
+  console.log(email_id)
+
+})
+
+router.get('/scheduleAppointment',(req,res)=>{
+  var email_id=req.query.email_id;
+  console.log(email_id)
+})
+
+router.get('/hangePassword', (req,res)=>{
+  var email_id=req.query.email_id;
+  console.log(email_id)
+})
+
 // function isLoggedIn(req, res, next){
 //   if(req.isAuthenticated()){
 //     console.log('User is authenticated');
