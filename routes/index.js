@@ -101,7 +101,7 @@ router.post('/login_patient', passport.authenticate("patient",{
 }),function(req, res){
   var email = req.body.username;
   var password = req.body.password;
-  console.log(email);
+  console.log("login patient",email);
   console.log(password);
   const dataToPass = { email_id: email};
   console.log(dataToPass);
@@ -110,30 +110,32 @@ router.post('/login_patient', passport.authenticate("patient",{
 
 router.get('/dashboard_patient', (req, res) =>{
   const passedData = JSON.parse(decodeURIComponent(req.query.data));
-  const email_d = passedData.email_id;
-    // console.log(email);
+  const email_id = passedData.email_id;
+    console.log("dashboard patient ",email_id);
     // res.send(email);
     const query = 'SELECT name FROM patient WHERE email = ? ';
-    db.query(query, [email_d], (err, results) => {
+    db.query(query, [email_id], (err, results) => {
       if (err) { return done(err); }
       console.log(results[0].name);
-      res.render('home', {name: results[0].name, email: email_d})
+      res.render('home', {name: results[0].name, email: email_id})
     });
   
 });
 
 router.get('/viewMedicalHistory', (req, res) =>{
   var email_id = req.query.email;   //check this is working or not without JsonStringify
-  console.log(email_id);
-  const query = 'SELECT * FROM Medical_history WHERE email_id = ?';
+  console.log("Viw Medical History",email_id);
+  const query = 'SELECT gender,name,email,address,conditions,surgeries,medication FROM PatientsFillHistory,Patient,MedicalHistory WHERE PatientsFillHistory.history=id AND patient=email AND email =?';
   db.query(query, [email_id], (error, results) => {
+    console.log("result",results);
     if (error) {
       // Handle error
       console.error('Error fetching medical history:', error);
       res.status(500).send('Error fetching medical history');
     } else {
       // Render a webpage to display the medical history data
-      res.render('medicalHistory', { medicalHistory: results });
+      // res.render('medicalHistory', { medicalHistory: results });
+      res.send(results);
     }
  });
 });
@@ -191,18 +193,20 @@ router.get('/viewPatients?email', (req,res)=>{              //added today 04/04/
 
 
 router.get('/settings', (req,res)=>{   //added today 04/04/2024
-  var email_id=req.query.email_id;
-  console.log(email_id)
+  var email_id=req.query.email;
+  console.log("setting",email_id)
   res.render('settings_page', {email: email_id} );
 })
 
 router.post('/changePassword', (req,res)=>{  //added today 04/04/2024
+  console.log("Requesting DB From")
   var email_id=req.query.email;     //check this works or not on passing it form because of post method
   var old_pass=req.body.oldPassword;
   var new_pass=req.body.newPassword;
+  console.log("changePass",email_id,old_pass,new_pass);
   const check_old_pass="SELECT * FROM patient WHERE email=? AND password = ?";
   const put_new_pass="UPDATE patient SET password = ? WHERE password = ?"
-
+  console.log("Requesting DB")
   db.query(check_old_pass, [email_id,old_pass], (err, rows) =>{
     if (err) {
       console.error('Error:', err);
@@ -218,19 +222,21 @@ router.post('/changePassword', (req,res)=>{  //added today 04/04/2024
         console.error('Error:', err);
         return res.status(500).json({ success: false, message: 'Internal server error' });
       }
-      res.redirect('/login'); // Redirect to login page on success  AND add flash mesage of sucess
+      //res.redirect('/'); 
+      // Redirect to login page on success  AND add flash mesage of sucess and send msg you will be redirected to login page in 3sec
+      res.sendFile(path.join(__dirname, '../public/doctor_login.html'));
       // res.json({ success: true, message: 'Password updated successfully' });
     })
   });  
 });
 
 
-router.get('/signout',(req,res)=>{  //added today 04/04/2024
+router.get('/signout',(req,res)=>{  //added today 04/04/2024    working perfect make it separate for doctor and patient
   req.session.destroy((err) => {
     if (err) {
       console.error('Error destroying session:', err);
     }
-    res.redirect('/'); // Redirect to the login page after signout
+    res.send("logged out") // Redirect to the login page after signout
   });
 })
 
