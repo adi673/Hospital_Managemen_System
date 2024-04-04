@@ -133,10 +133,10 @@ router.get('/dashboard_doctor', (req, res) =>{
 });
 
 router.get('/viewMedicalHistory', (req, res) =>{
-  var email_id = req.query.email;
+  var email_id = req.query.email;   //check this is working or not without JsonStringify
   console.log(email_id);
   const query = 'SELECT * FROM Medical_history WHERE email_id = ?';
-  connection.query(query, [email_id], (error, results) => {
+  db.query(query, [email_id], (error, results) => {
     if (error) {
       // Handle error
       console.error('Error fetching medical history:', error);
@@ -148,21 +148,51 @@ router.get('/viewMedicalHistory', (req, res) =>{
  });
 });
 
-router.get('/viewAppointment',(req,res)=>{
+router.get('/viewAppointment',(req,res)=>{  //added today
   var email_id=req.query.email_id;
   console.log(email_id)
 
 })
 
-router.get('/scheduleAppointment',(req,res)=>{
+router.get('/scheduleAppointment',(req,res)=>{  //added today
   var email_id=req.query.email_id;
   console.log(email_id)
 })
 
-router.get('/hangePassword', (req,res)=>{
+router.get('/settings', (req,res)=>{   //added today
   var email_id=req.query.email_id;
   console.log(email_id)
+  res.render('settings_page', {email: email_id} );
 })
+
+router.post('/changePassword', (req,res)=>{  //added today
+  var email_id=req.query.email;     //check this works or not on passing it form because of post method
+  var old_pass=req.body.oldPassword;
+  var new_pass=req.body.newPassword;
+  const check_old_pass="SELECT * FROM patient WHERE email=? AND password = ?";
+  const put_new_pass="UPDATE patient SET password = ? WHERE password = ?"
+
+  db.query(check_old_pass, [email_id,old_pass], (err, rows) =>{
+    if (err) {
+      console.error('Error:', err);
+      return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+
+    if (rows.length === 0) {
+      return res.status(401).json({ success: false, message: 'Incorrect old password' });
+    }
+
+    db.query(put_new_pass, [new_pass,old_pass], (err) => {
+      if (err) {
+        console.error('Error:', err);
+        return res.status(500).json({ success: false, message: 'Internal server error' });
+      }
+      res.redirect('/login'); // Redirect to login page on success  AND add flash mesage of sucess
+      // res.json({ success: true, message: 'Password updated successfully' });
+    })
+  });  
+});
+
 
 // function isLoggedIn(req, res, next){
 //   if(req.isAuthenticated()){
