@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HMS</title>
+    <style>
+        /* CSS styles as provided */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            font-size: 40px;
+        }
+        .container {
+            margin: auto;
+            max-width: 960px;
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            background-color: black;
+            color: white;
+            padding: 10px 20px;
+            z-index: 1000;
+        }
+        .panel {
+            background-color: #ffffff;
+            border-radius: 4px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 60px; /* Adjusted margin to accommodate header */
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table th {
+            text-align: left;
+            padding: 8px;
+            background-color: #f2f2f2;
+        }
+        .table td {
+            text-align: left;
+            padding: 8px;
+        }
+        .table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .action-buttons a {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 8px 16px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .action-buttons a:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="/" style="color: inherit; text-decoration: inherit;"><h1 style="margin: 0;">HMS</h1></a>
+    </header>
+    <div class="container">
+        <div class="panel panel-default p50 uth-panel">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Date of Appointment</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Concerns</th>
+                        <th>Symptoms</th>
+                        <th>Status</th>
+                        <th>Action</th> <!-- Add Action column -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <% appointments.forEach(appointment => { %>
+                        <tr>
+                            <td><%= appointment.theDate %></td>
+                            <td><%= appointment.theStart %></td>
+                            <td><%= appointment.theEnd %></td>
+                            <td><%= appointment.theConcerns %></td>
+                            <td><%= appointment.theSymptoms %></td>
+                            <td><%= appointment.status %></td>
+                            <td class="action-buttons"> <!-- Add Action buttons as links -->
+                                <a href="/diagnosis/<%= appointment.ID %>">View Diagnosis</a>
+                                <a href="/delete/<%= appointment.ID %>">Delete</a>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

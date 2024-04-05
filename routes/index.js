@@ -149,8 +149,34 @@ router.get('/viewMedicalHistory', (req, res) =>{
 });
 
 router.get('/viewAppointment',(req,res)=>{  //added today  04/04/2024
-  var email_id=req.query.email_id;
-  console.log(email_id)
+  var email_id = req.query.email;   //check this is working or not without JsonStringify
+  console.log("papa bolo ",email_id);
+  const query =  "SELECT PatientsAttendAppointments.appt AS ID, PatientsAttendAppointments.patient AS user, PatientsAttendAppointments.concerns AS theConcerns, PatientsAttendAppointments.symptoms AS theSymptoms, DATE_FORMAT(Appointment.date, '%d/%m/%Y') AS theDate, Appointment.starttime AS theStart, Appointment.endtime AS theEnd, Appointment.status AS status FROM PatientsAttendAppointments JOIN Appointment ON PatientsAttendAppointments.appt = Appointment.id WHERE PatientsAttendAppointments.patient = ?;";
+
+  db.query(query, [email_id], (error, results) => {
+    if (error) {
+      console.error('Error fetching appointments:', error);
+      res.status(500).send('Error fetching appointments');
+    } else { 
+      console.log(results);
+      res.render('viewAppt', { appointments: results });
+    }
+  });
+})
+
+router.get('/diagnosis', (req,res)=>{
+  var appt_id=req.query.appt_id;
+  console.log(appt_id);
+  const sql = 'SELECT * FROM Diagnose WHERE appt=?';
+  db.query(sql, [appt_id], (err, results) => {
+    if (err) {
+      console.error('Error:', err);
+      return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+    console.log(results);
+    res.render('diagnose', {appt_id: appt_id, diagnosis: results[0]});
+  });
+  
 
 })
 
@@ -274,13 +300,6 @@ router.post('/changePasswordDoc', (req,res)=>{  //added today 04/04/2024
   });  
 });
 
-
-
-
-
-
-
-
 router.get('/signout',(req,res)=>{  //added today 04/04/2024    working perfect make it separate for doctor and patient
   req.session.destroy((err) => {
     if (err) {
@@ -290,10 +309,10 @@ router.get('/signout',(req,res)=>{  //added today 04/04/2024    working perfect 
   });
 })
 
-router.get('/gobackPatientDashboard',(req,res)=>{  //added today 04/04/2024 
-  var email_id=req.query.email;
-  res.redirect(`/dashboard_patient?data=${encodeURIComponent(JSON.stringify({email_id:email_id}))}`);
-});
+// router.get('/gobackPatientDashboard',(req,res)=>{  //added today 04/04/2024 
+//   var email_id=req.query.email;
+//   res.redirect(`/dashboard_patient?data=${encodeURIComponent(JSON.stringify({email_id:email_id}))}`);
+// });
 
 // function isLoggedIn(req, res, next){
 //   if(req.isAuthenticated()){
