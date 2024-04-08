@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HMS Scheduling Appointment</title>
+    <style>
+        /* Your CSS styles */
+        body {
+            font-family: 'Lato', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            margin: auto;
+            max-width: 600px;
+            padding: 20px;
+        }
+        .header {
+            background-color: #000000;
+            border-radius: 0px 0px 0 0;
+            padding: 20px;
+            text-align:left;
+        }
+        .header h1 {
+            margin: 0;
+            color: #ffffff;
+        }
+        .form-container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333333;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #000000;
+            border-radius: 5px;
+            box-sizing: border-box;
+            appearance: none; /* Removes default dropdown arrow */
+            background-color: #ffffff;
+            /* color: #ffffff; */
+            font-size: 16px;
+        }
+        input[type="date"],
+        input[type="time"] {
+            width: 47%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            appearance: none; /* Removes default styling */
+        }
+        input[type="date"] {
+            margin-right: 6px;
+        }
+        input[type="time"] {
+            margin-left: 6px;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #000000;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #00ffd0;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>HMS  </h1>
+    </header>
+    <div class="container">
+        <div class="form-container">
+            <form id="schedulingForm" action="schedulereq?mail_id=<%= email %>" method="post">
+                <div class="input-group">
+                    <label for="doctor">Select Doctor: <%= email %></label>
+                    <select id="doctor" name="doctor" required>
+                        <option value="" disabled selected>Select your doctor</option>
+                        <% doctors.forEach(doctor => { %>
+                            <option value="  <%= doctor.email %>"> Dr.<%= doctor.name %> (<%= doctor.email %>)</option>
+                        <% }); %>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <input type="date" id="date" name="date" required>
+                    <input type="time" id="time" name="time" required>
+                    <div style="clear: both;"></div>
+                </div>
+                <div class="input-group">
+                    <label for="concerns">Concerns:</label>
+                    <textarea id="concerns" name="concerns" placeholder="Enter your concerns..." required></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="symptoms">Symptoms:</label>
+                    <textarea id="symptoms" name="symptoms" placeholder="Enter your symptoms..." required></textarea>
+                </div>
+                <button type="submit">Attempt To Schedule</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

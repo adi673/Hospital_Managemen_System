@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnose</title>
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet"> -->
+    <style>
+        body {
+            font-family: 'Lato', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        header {
+            background: #000000;
+            color: #ffffff;
+            padding: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1;
+        }
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        .container {
+            margin-top: 80px;
+            padding: 20px;
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            color: #000000;
+        }
+        textarea {
+            width: calc(100% - 16px);
+            height: 120px;
+            padding: 8px;
+            border: 1px solid #dddddd;
+            border-radius: 5px;
+            font-family: 'Lato', sans-serif;
+            resize: none;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #000000;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        button:hover {
+            background-color: #00ffd0;
+            color: #000000;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="/" style="color: inherit; text-decoration: inherit;">
+            <h1>HMS</h1>
+        </a>
+    </header>
+    <div class="container">
+        <form action="submitDiagnosis?id=<%= appointment_id %>"  method="post">  <!-- Fixed this line -->
+            <h4>Diagnosis <%= appointment_id %></h4> <!-- Fixed this line -->
+            <textarea name="diagnosis" placeholder="Enter Diagnosis" required></textarea>
+            <h4>Prescription</h4>
+            <textarea name="prescription" placeholder="Enter Prescription" required></textarea>
+            <button type="submit">Submit Diagnosis</button>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HMS</title>
+    <style>
+        body {
+            font-family: 'Lato', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            margin: auto;
+            max-width: 600px;
+            padding: 20px;
+        }
+        .flash-card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .flash-card table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .flash-card th, .flash-card td {
+            padding: 12px;
+            border-bottom: 1px solid #dddddd;
+        }
+        .flash-card th {
+            text-align: left;
+            background-color: #f2f2f2;
+        }
+        .flash-card hr {
+            margin-top: 20px;
+            border: none;
+            border-top: 1px solid #dddddd;
+        }
+        .flash-card h3 {
+            margin: 0;
+            color: #333333;
+            text-align: center;
+        }
+        header {
+            padding: 20px;
+            background-color: #000000;
+            border-radius: 8px 8px 0 0;
+        }
+        header h3 {
+            margin: 0;
+            color: #ffffff;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <a href="/" style="color: inherit; text-decoration: inherit;"><h3>HMS</h3></a>
+        </div>
+    </header>
+    <div class="container">
+        <div class="flash-card">
+            <h3>Appointment Details</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Appointment ID</th>
+                        <th>Doctor</th>
+                        <th>Diagnosis</th>
+                        <th>Prescription</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% diagnosis.forEach(item => { %>
+                        <tr>
+                            <td><%= appointment_id %></td> <!-- Changed appointment_id to item.appointment_id -->
+                            <td><%= doc[0].name %></td>
+                            <td><%= item.diagnosis %></td>
+                            <td><%= item.prescription %></td>
+                        </tr>
+                    <% }); %> <!-- Added closing parenthesis for forEach loop -->
+                </tbody>
+            </table>
+        </div>
+        <hr />
+    </div>
+</body>
+</html>

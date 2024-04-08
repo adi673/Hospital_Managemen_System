@@ -102,8 +102,8 @@
                             <td><%= appointment.theSymptoms %></td>
                             <td><%= appointment.status %></td>
                             <td class="action-buttons"> <!-- Add Action buttons as links -->
-                                <a href="/diagnosis/<%= appointment.ID %>">View Diagnosis</a>
-                                <a href="/delete/<%= appointment.ID %>">Delete</a>
+                                <a href="/diagnosis?appointment_id=<%= appointment.ID %>">View Diagnosis</a>
+                                <a href="/deleteAppt?appointment_id=<%= appointment.ID %>">Delete</a>
                             </td>
                         </tr>
                     <% }); %>

@@ -4,15 +4,125 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Create Account</title>
-  <link rel="stylesheet" href="/stylesheets/Register.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+      animation: fadeIn 2.5s ease-in;
+    }
+
+    .app-bar {
+      font-family: 'Arial Black', sans-serif; 
+      background-color: #2c3e50; /* Dark blue color */
+      color: #ffffff;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .app-bar h1 {
+      margin: 0;
+      font-size: 32px;
+      font-family: 'Arial Black', sans-serif; /* Custom font */
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      animation: slideInUp 2.5s ease-in-out;
+    }
+
+    h3 {
+      margin-top: 0;
+    }
+
+    form {
+      margin-top: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+      box-sizing: border-box;
+      margin-bottom: 10px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="password"]:focus {
+      outline: none;
+      border-color: #000000;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      border-radius: 5px;
+      background-color: #2c3e50; /* Dark blue color */
+      color: #ffffff;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    button.cancel {
+      background-color: #e74c3c; /* Red color */
+      margin-right: 10px;
+    }
+
+    button.signup {
+      background-color: #2c3e50; /* Dark blue color */
+    }
+
+    button:hover {
+      background-color: #ffffff;
+      color: #2c3e50; /* Dark blue color */
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideInUp {
+      from {
+        transform: translateY(50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+  </style>
 </head>
 <body>
   <header class="app-bar">
-    <a href="/"><h3>HMS</h3></a>
+    <h1>HMS</h1>
   </header>
   <div class="container">
     <div class="form-container">
-      <hr><hr><hr><hr>
       <h3>Patient's registration form:</h3>
       <form action="/register_patient" method="post" onsubmit="return validateForm()">
         <label for="firstName">First Name:</label>
@@ -36,10 +146,10 @@
         <button type="reset" class="cancel">Cancel</button>
         <button type="submit" class="signup">Sign Up</button>
       </form>
-      <div align="center" style="margin-top: 20px;">
+      <!-- <div align="center" style="margin-top: 20px;">
         <p>Are you a doctor?</p>
         <a href="/MakeDoc" style="text-decoration: none;"><button class="signup">I'm a doctor</button></a>
-      </div>
+      </div> -->
     </div>
   </div>
 

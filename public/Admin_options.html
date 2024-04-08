@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+      animation: fadeIn 2.5s ease-in;
+    }
+
+    .app-bar {
+      background-color: #2c3e50; /* Dark blue color */
+      color: #ffffff;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .app-bar h1 {
+      margin: 0;
+      font-size: 32px;
+      font-family: 'Arial Black', sans-serif; /* Custom font */
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 50px auto;
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      animation: slideInUp 2.5s ease-in-out;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    h3 {
+      margin-top: 0;
+    }
+
+    .admin-options {
+      width: 100%;
+      text-align: center;
+      display: flex;
+      justify-content: center; /* Center horizontally */
+      margin-bottom: 50px;
+    }
+
+    .admin-option {
+      flex-grow: 1; /* Stretch to fill available space */
+      padding: 20px;
+      background-color: #2c3e50; /* Dark blue color */
+      color: #ffffff;
+      border-radius: 5px;
+      text-align: center;
+      cursor: pointer;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .admin-option:hover {
+      background-color: #ffffff;
+      color: #2c3e50; /* Dark blue color */
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideInUp {
+      from {
+        transform: translateY(50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* Remove underline and change color of anchor links */
+    a {
+      text-decoration: none;
+      color: inherit; /* Inherit the color from the parent element */
+    }
+  </style>
+</head>
+<body>
+  <header class="app-bar">
+    <h1>HMS - Admin</h1>
+  </header>
+  <div class="container">
+    <h3>Admin Options:</h3>
+    <div class="admin-options">
+      <a href="/view_database">
+        <div class="admin-option">View Database</div>
+      </a>
+      <a href="/Add_Doctor">
+        <div class="admin-option">Create Doctor</div>
+      </a>
+    </div>
+  </div>
+  
+
+  <script>
+    function redirectTo(url) {
+      window.location.href = url;
+    }
+  </script>
+</body>
+</html>
