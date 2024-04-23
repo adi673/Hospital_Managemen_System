@@ -9,96 +9,103 @@ const db = require('../models/db');
 const e = require('express');
 const res = require('express/lib/response');
 const moment = require('moment');
-const axios = require('axios');
-const fetch = require('fetch');
 
 // app.use(bodyParser.urlencoded({ extended: true }));
 
 ap.use(express.urlencoded({ extended: true }));
 router.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
+  // res.sendFile(path.join(__dirname, '../public/index.html'));
+  res.render('index');
 });
+
 
 router.post('/register_patient', (req, res) => {
-  var l_name=req.body.lastName;
-  var f_name=req.body.firstName;
+  var l_name = req.body.lastName;
+  var f_name = req.body.firstName;
   var name = f_name + " " + l_name;
-  var gender=req.body.gender;
-  var conditions=req.body.conditions;
-  var surgeries=req.body.surgeries;
-  var medications=req.body.medications;
-  var address=req.body.address;
-  var email=req.body.email;
-  var password=req.body.password;
-  
-  if(medications===undefined){
-      medications="none"
-    }
-    if(conditions===undefined){
-      conditions="none"
-    }
-    if(!surgeries===undefined){
-      surgeries="none"
+  var gender = req.body.gender;
+  var conditions = req.body.conditions || "none";
+  var surgeries = req.body.surgeries || "none";
+  var medications = req.body.medications || "none";
+  var address = req.body.address;
+  var email = req.body.email;
+  var password = req.body.password;
+
+  var sql = "INSERT INTO Patient(email, password, name, address, gender) VALUES ?";
+  var values = [[email, password, name, address, gender]];
+
+  db.query(sql, [values], function(err, result) {
+    if (err) {
+      if (err.code === 'ER_DUP_ENTRY') {
+        req.flash('error', 'A patient with this email already exists.'); // Add flash message for error
+        res.redirect('Register'); // Redirect or render depending on your app structure
+      } else {
+        req.flash('error', 'Failed to register patient due to a database error.');
+        res.redirect('Register');
+      }
     }
 
-    var sql="INSERT INTO Patient(email,password,name,address,gender) VALUES ?"
-    var values = [
-      [email,password,name,address,gender]
-    ];  
-    db.query(sql,[values], function(err, result) {
-      if (err) throw err;
-      // res.send('Patient Registered');
-    });
-   
-    var sql2="select id from MedicalHistory group by id desc "
+    // Proceed with next SQL operation if no error
+    var sql2 = "SELECT id FROM MedicalHistory ORDER BY id DESC LIMIT 1";
     db.query(sql2, function(err, result) {
-      if (err) throw err;
-      else{
-        console.log(result[0].id  )
-        let generated_id=result[0].id+1
-        let sql3="INSERT INTO MedicalHistory(id,date,conditions,surgeries,medication) VALUES ?"
-        let currentDate = new Date().toJSON().slice(0, 10);
-        var values2 = [
-          [generated_id,currentDate,conditions,surgeries,medications]
-        ];
-        db.query(sql3,[values2], function(err, result) {
-          if (err) throw err;
-          else{
-            let sql4="INSERT INTO patientsfillhistory(patient,history) VALUES ?"
-            var values3 = [
-              [email,generated_id]
-            ];
-            db.query(sql4,[values3], function(err, result) {
-              if (err) throw err;
-              else{
-                res.send('Patient Registered');
-              }
-            });
+      if (err) {
+        req.flash('error', 'Failed to retrieve medical history.');
+        res.redirect('Register');
+      }
+
+      let generated_id = result[0].id + 1;
+      let currentDate = new Date().toJSON().slice(0, 10);
+      let sql3 = "INSERT INTO MedicalHistory(id, date, conditions, surgeries, medication) VALUES ?";
+      var values2 = [[generated_id, currentDate, conditions, surgeries, medications]];
+
+      db.query(sql3, [values2], function(err, result) {
+        if (err) {
+          req.flash('error', 'Failed to create medical history.');
+          res.redirect('Register');
+        }
+
+        let sql4 = "INSERT INTO patientsfillhistory(patient, history) VALUES ?";
+        var values3 = [[email, generated_id]];
+
+        db.query(sql4, [values3], function(err, result) {
+          if (err) {
+            req.flash('error', 'Failed to link patient with medical history.');
+            res.redirect('Register');
           }
           
+          req.flash('success', 'Registered patient successfully!');
+          res.render('patient_login');
         });
-      } 
+      });
     });
+  });
 });
 
+
+
 router.get('/register', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/Register.html'));
+  res.render('Register');
 });
+
 
 router.post('/login', (req, res) => {
   const role = req.body.role;
   // Here you can process the form data as needed (e.g., save to database, authenticate user, etc.)
   console.log('Role:', role);
  if(role === 'doctor'){
-    res.sendFile(path.join(__dirname, '../public/doctor_login.html'));
+    // res.sendFile(path.join(__dirname, '../public/doctor_login.html'));
+    res.render('doctor_login');
  } else if(role === 'patient'){
-    res.sendFile(path.join(__dirname, '../public/patient_login.html'));
+    // res.sendFile(path.join(__dirname, '../public/patient_login.html'));
+    res.render('patient_login');
  }else if(role === 'new'){
     res.redirect('/register')
  }else if(role === 'admin'){
-    res.sendFile(path.join(__dirname, '../public/AdminLogin.html'));
+    // res.sendFile(path.join(__dirname, '../public/AdminLogin.html'));
+    res.render('AdminLogin');
  }
 });
+
 
 router.post('/login_patient', passport.authenticate("patient",{ 
   successRedirect:'',
@@ -110,21 +117,22 @@ router.post('/login_patient', passport.authenticate("patient",{
   console.log(password);
   const dataToPass = { email_id: email};
   console.log(dataToPass);
+  req.flash('success', 'logged in successfully!');
  res.redirect(`/dashboard_patient?data=${encodeURIComponent(JSON.stringify(dataToPass))}`);
 });
+
 
 router.post('/login_admin', (req, res) => {
   var email = req.body.username;
   var password = req.body.password;
   if(email === 'admin' && password === 'adi673'){
-    res.sendFile(path.join(__dirname, '../public/Admin_options.html'));
+    req.flash('success', 'logged in successfully!');
+    res.render('Admin_options');
+    // res.sendFile(path.join(__dirname, '../public/Admin_options.html'));
   }else{
+    req.flash('error', 'Invalid username or password!');
    res.redirect('/');
   }
-});
-
-router.get('/Add_Doctor', (req, res) => {
-
 });
 
 router.get('/view_database', (req, res) => {
@@ -215,6 +223,43 @@ router.get('/view_database', (req, res) => {
   });
 });
 
+
+router.get('/Add_Doctor', (req, res) => {
+  // res.sendFile(path.join(__dirname, '../public/MakeDoc.html'));
+  res.render('MakeDoc');
+});
+
+
+router.post('/submitDoctorForm', (req, res) => { 
+  let params = req.body;
+  let name = params.name + " " + params.lastname;
+  let email = params.email;
+  let password = params.password;
+  let gender = params.gender;
+  let schedule = params.schedule;
+  console.log(params);
+  let sql_statement = `INSERT INTO Doctor (email, gender, password, name) 
+                       VALUES ` + `("${email}", "${gender}", "${password}", "${name}")`;
+  console.log(sql_statement);
+  db.query(sql_statement, function (error, results, fields) {
+    if (error) throw error;
+    else {
+      let sql_statement = `INSERT INTO DocsHaveSchedules (sched, doctor) 
+                       VALUES ` + `(${schedule}, "${email}")`;
+      console.log(sql_statement);
+      db.query(sql_statement, function(error){
+        if (error) throw error;
+        else {
+          req.flash('success', 'Doctor created successfully!');
+          res.render('Admin_options');
+          // res.sendFile(path.join(__dirname, '../public/Admin_options.html'));
+        }
+      })
+    };
+  });
+ });
+
+
 router.get('/dashboard_patient', (req, res) =>{
   const passedData = JSON.parse(decodeURIComponent(req.query.data));
   const email_id = passedData.email_id;
@@ -226,20 +271,21 @@ router.get('/dashboard_patient', (req, res) =>{
       console.log(results[0].name);
       res.render('home', {name: results[0].name, email: email_id})
     });
-  
 });
+
 
 router.get('/viewMedicalHistory', (req, res) =>{
   var email_id = req.query.email;   //check this is working or not without JsonStringify
   console.log("Viw Medical History",email_id);
   const query = 'SELECT gender,name,email,address,conditions,surgeries,medication FROM PatientsFillHistory,Patient,MedicalHistory WHERE PatientsFillHistory.history=id AND patient=email AND email =?';
+ 
   db.query(query, [email_id], (error, results) => {
     console.log("result",results);
     if (error) {
       console.error('Error fetching medical history:', error);
       res.status(500).send('Error fetching medical history');
     } else {
-      const query2 = 'SELECT date, doctor, concerns, symptoms, diagnosis, prescription FROM Appointment A INNER JOIN (SELECT * FROM PatientsAttendAppointments  NATURAL JOIN Diagnose  WHERE patient = ?) AS B ON A.id = B.appt;';
+      const query2= "SELECT DATE_FORMAT(A.date, '%d/%m/%Y') As appointment_date, D.name AS doctor_name, B.concerns, B.symptoms, B.diagnosis, B.prescription FROM Appointment A INNER JOIN (SELECT PA.appt, PA.concerns, PA.symptoms, D.diagnosis, D.prescription, D.doctor FROM PatientsAttendAppointments PA INNER JOIN Diagnose D ON PA.appt = D.appt WHERE PA.patient = ?) AS B ON A.id = B.appt INNER JOIN Doctor D ON D.email = B.doctor;";
       db.query(query2, [email_id], (error, results2) => {
         console.log("result2",results2);
         if (error) {
@@ -271,6 +317,69 @@ router.get('/viewAppointment',(req,res)=>{  //added today  04/04/2024
   });
 })
 
+
+router.get('/deleteAppt', (req, res) => {
+  let uid = req.query.appointment_id;
+  var email_id;
+  let toFindE_mail = 'SELECT patient FROM PatientsAttendAppointments WHERE appt = ?';
+  
+  // Query to find email
+  db.query(toFindE_mail, [uid], (err, results) => {
+      if (err) {
+          console.log('Error:', err);
+          return res.status(500).json({ success: false, message: 'Internal server error' });
+      }
+      if (results.length === 0 || !results[0]) {
+          console.log('No patient found for this appointment');
+          return res.status(404).json({ success: false, message: 'No patient found' });
+      }
+      email_id = results[0].patient;
+      const dataToPass = { email_id:email_id};
+  console.log(dataToPass);
+      // Check appointment status and act accordingly
+      let statement = `SELECT status FROM Appointment WHERE id=${uid};`;
+      console.log(statement);
+      db.query(statement, function (error, results, fields) {
+          if (error) {
+              console.log('Error:', error);
+              return res.status(500).json({ success: false, message: 'Internal server error' });
+          }
+          if (results.length === 0 || !results[0]) {
+              console.log('Appointment not found');
+              return res.status(404).json({ success: false, message: 'Appointment not found' });
+          }
+          let status = results[0].status;
+          if (status === "NotDone") {
+              console.log("in if not done case");
+              let deleteStmt = `DELETE FROM Appointment WHERE id=${uid};`;
+              console.log(deleteStmt);
+              db.query(deleteStmt, function (error, results, fields) {
+                  if (error) {
+                      console.log('Error:', error);
+                      return res.status(500).json({ success: false, message: 'Internal server error' });
+                  }
+                  console.log('Appointment deleted');
+                  res.redirect(`/dashboard_patient?data=${encodeURIComponent(JSON.stringify(dataToPass))}`);
+              });
+          } else {
+              console.log("in else done case");
+              let deleteStmt = `DELETE FROM PatientsAttendAppointments WHERE appt = ${uid}`;
+              console.log(deleteStmt);
+              db.query(deleteStmt, function (error, results, fields) {
+                  if (error) {
+                      console.log('Error:', error);
+                      return res.status(500).json({ success: false, message: 'Internal server error' });
+                  }
+                  console.log('Patient appointment linkage deleted');
+                  req.flash('success', 'Deleted the appointment successfully!');
+                  res.redirect(`/dashboard_patient?data=${encodeURIComponent(JSON.stringify(dataToPass))}`);
+              });
+          }
+      });
+  });
+});
+
+
 router.get('/diagnosis', (req,res)=>{  //check what happens in front end when multiple rows are forwarded in frontend like multiple diagnosis reports
   var appt_id=req.query.appointment_id;
   console.log("appt_id",appt_id);
@@ -292,42 +401,8 @@ router.get('/diagnosis', (req,res)=>{  //check what happens in front end when mu
       res.render('viewDiagnosis', {appointment_id: appt_id, diagnosis: results,doc:results1});
     })
     console.log("diagnosis kutra results",results);
-    
   });
-  
-
 })
-
-router.get('/deleteAppt',(req,res)=>{
-  var u_id=req.query.appointment_id
-  console.log("u_id",u_id)
-  const sql="SELECT status FROM Appointment WHERE id=?"
-  db.query(sql,[u_id],(err,results)=>{
-    if(err){
-      console.log('Error:',err);
-      return res.status(500).json({ success: false, message: 'Internal server error' });
-    }
-    else{
-      results = results[0].status
-      if(results == "NotDone"){
-        const statement1 = 'DELETE FROM Appointment WHERE id=${uid};';
-        // console.log(statement);
-        db.query(statement1,[u_id], function (error, results1) {
-          if (error) throw error;
-        });
-      }else{
-        
-        const statement2 = 'DELETE FROM PatientsAttendAppointments  WHERE appt = ?';
-        // console.log(statement);
-        db.query(statement2,[u_id], function (error, results2) {
-          if (error) throw error;
-        });
-         
-      } 
-    }
-  });
-  return
-});
 
 router.get('/scheduleAppointment',(req,res)=>{  //added today 04/04/2024
   var email_id=req.query.emaild;
@@ -343,13 +418,15 @@ router.get('/scheduleAppointment',(req,res)=>{  //added today 04/04/2024
   });
 });
 
+
 router.get('/Patient_settings', (req,res)=>{   //added today 04/04/2024
   var email_id=req.query.email;
   console.log("setting",email_id)
   res.render('settings_patient', {email: email_id} );
 });
 
-router.post('/PasswordPatient', (req,res)=>{  //added today 04/04/2024
+
+router.post('/changePasswordPatient', (req,res)=>{  //added today 04/04/2024
   console.log("Requesting DB From")
   var email_id=req.query.email;     //check this works or not on passing it form because of post method
   var old_pass=req.body.oldPassword;
@@ -375,7 +452,9 @@ router.post('/PasswordPatient', (req,res)=>{  //added today 04/04/2024
       }
       //res.redirect('/'); 
       // Redirect to login page on success  AND add flash mesage of sucess and send msg you will be redirected to login page in 3sec
-      res.sendFile(path.join(__dirname, '../public/patient_login.html'));
+      req.flash('success', 'Changed password successfully!');
+      // res.sendFile(path.join(__dirname, '../public/patient_login.html'));
+      res.render('patient_login');
       // res.json({ success: true, message: 'Password updated successfully' });
     })
   });  
@@ -438,9 +517,6 @@ router.post('/schedulereq', (req, res) => {
         }
         console.log("doc", doc2);
         console.log("result3", results3);
-
-        
-
         console.log(results1.length, results2.length, results3.length);
         if (results1.length > 0 || results2.length > 0 || results3.length === 0) {
           console.log("Conflicts exist, return all results indicating the conflicts");
@@ -490,29 +566,6 @@ router.post('/schedulereq', (req, res) => {
 });
 
 
-
-// router.post('/schedulereq',(req,res)=>{
-//   var email_id=req.query.mail_id;
-//   var date=req.body.date;
-//   const dateString = new Date(date);
-//   const dayOfWeekNumber = dateString.getDay();
-//   const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-//   const dayOfWeekName = days[dayOfWeekNumber];
-//   var time=req.body.time;
-//   var doc=req.body.doctor;
-//   var concerns=req.body.concerns;
-//   var symptoms=req.body.symptoms;
-//   console.log('sc',typeof(email_id));
-//   console.log("try schedule",email_id,dateString,time,concerns,symptoms,doc,dayOfWeekName);
- 
-// });
-
-
-
-
-
-
-
 router.post('/login_doctor', passport.authenticate("doctor",{   //added today 04/04/2024
   successRedirect:'',
   failureRedirect: "/",
@@ -524,12 +577,15 @@ router.post('/login_doctor', passport.authenticate("doctor",{   //added today 04
   console.log(password);
   const dataToPass = { email_id: email};
   console.log(dataToPass);
- res.redirect(`/dashboard_doctor?data=${encodeURIComponent(JSON.stringify(dataToPass))}`);
+  req.flash('success', 'loggedin successfully!');
+  res.redirect(`/dashboard_doctor?data=${encodeURIComponent(JSON.stringify(dataToPass))}`);
 })
+
 
 router.get('/dashboard_doctor', (req, res) =>{            //added today 04/04/2024
   const passedData = JSON.parse(decodeURIComponent(req.query.data));
   const email_d = passedData.email_id;
+  console.log("dashboard doctor ",email_d);
     // console.log(email);
     // res.send(email);
     const query = 'SELECT name FROM doctor WHERE email = ? ';
@@ -541,12 +597,13 @@ router.get('/dashboard_doctor', (req, res) =>{            //added today 04/04/20
   // res.send('Doctror Dashboard');
 });
 
+
 router.get('/viewAppointments', (req, res)=>{                //added today 04/04/2024
   var email_id = req.query.email;   //check this is working or not without JsonStringify
   console.log(email_id);
   let statement = "SELECT a.id, DATE_FORMAT(a.date, '%d/%m/%Y') AS date, a.starttime, a.status, p.name, psa.concerns, psa.symptoms FROM Appointment a, PatientsAttendAppointments psa, Patient p WHERE a.id = psa.appt AND psa.patient = p.email AND a.id IN (SELECT appt FROM Diagnose WHERE doctor= ?);";
   db.query(statement, [email_id], (err,results)=>{
-    if (err) {
+    if (err) { 
       console.error('Error:', err);
     }else{
        console.log(results);
@@ -557,49 +614,75 @@ router.get('/viewAppointments', (req, res)=>{                //added today 04/04
   
 });
 
+
+router.get('/deleteApptDoc', (req, res) => {
+  var uid= req.query.appt_id;
+  console.log(uid);
+
+  if (!uid) {
+      console.log('UID is undefined. Check query parameters.');
+      return res.status(400).json({ success: false, message: 'Missing appointment ID' });
+  }
+
+  var email_id;
+  let toFindE_mail = 'SELECT doctor FROM diagnose WHERE appt = ?';
+
+  // Query to find email
+  db.query(toFindE_mail, [uid], (err, results) => {
+      console.log("results", results);
+      if (err) {
+          console.log('Error:', err);
+          return res.status(500).json({ success: false, message: 'Internal server error' });
+      }
+      if (results.length === 0 || !results[0]) {
+          console.log('No patient found for this appointment');
+          return res.status(404).json({ success: false, message: 'No Doctor found' });
+      }
+      email_id = results[0].doctor;
+      const dataToPass = { email_id: email_id };
+      console.log(dataToPass);
+
+      // Check appointment status and act accordingly
+      let statement = `SELECT status FROM Appointment WHERE id=${uid};`;
+      console.log(statement);
+      db.query(statement, function (error, results, fields) {
+          if (error) {
+              console.log('Error:', error);
+              return res.status(500).json({ success: false, message: 'Internal server error' });
+          }
+          if (results.length === 0 || !results[0]) {
+              console.log('Appointment not found');
+              return res.status(404).json({ success: false, message: 'Appointment not found' });
+          }
+          let status = results[0].status;
+          let deleteStmt;
+          if (status === "NotDone") {
+              console.log("in if not done case");
+              deleteStmt = `DELETE FROM Appointment WHERE id=${uid};`;
+          } else {
+              console.log("in else done case");
+              deleteStmt = `DELETE FROM PatientsAttendAppointments WHERE appt = ${uid}`;
+          }
+          console.log(deleteStmt);
+          db.query(deleteStmt, function (error) {
+              if (error) {
+                  console.log('Error:', error);
+                  return res.status(500).json({ success: false, message: 'Internal server error' });
+              }
+              console.log('Database operation completed');
+              req.flash('success', 'Deleted the Appointment  successfully!');
+              res.redirect(`/dashboard_doctor?data=${encodeURIComponent(JSON.stringify(dataToPass))}`);
+          });
+      });
+  });
+});
+
+
 router.get('/showDignosisPage',(req,res)=>{
   var appt_id = req.query.appt_id;
   console.log(appt_id);
   res.render('diagnose_page', {appointment_id: appt_id});
 });
-
-
-// router.post('/submitDiagnosis', (req, res) => {  // Changed from router.get to router.post
-//   var id = req.query.id;  // Access id from req.body
-//   console.log("submitDiagnosis", id);
-//   var diagnosis = req.body.diagnosis;  // Access diagnosis from req.body
-//   var prescription = req.body.prescription;  // Access prescription from req.body
-//   console.log("submitDiagnosis", id, diagnosis, prescription);
-//   var statement = "UPDATE Diagnose SET diagnosis=?, prescription=?  WHERE appt=?;";
-//   console.log(statement)
-//   db.query(statement,[diagnosis,prescription,id],function (error, results) {
-//     if (error) throw error;
-//     else {
-//       let statement = `UPDATE Appointment SET status="Done" WHERE id=${id};`;
-//       console.log(statement)
-//       db.query(statement, function (error, results, fields){
-//         if(error) {
-//            throw error;
-//         }else{
-//           let statement = "select email doctor as email from Diagnose where appt = ?";
-//           db.query(statement,[id],function(error,results){
-//             if(error){
-//               throw error;
-//             }else{
-//               let email = results[0].email;
-//               res.redirect('/viewAppointments?email='+email);
-                
-              
-//             }
-//           });
-//           console.log("Diagnosis submitted");
-//           res.redirect('/viewAppointments');
-//         }
-          
-//       });
-//      }
-//   });
-// });  dont delete this before testing below one 
 
 
 router.post('/submitDiagnosis', (req, res) => {
@@ -609,46 +692,74 @@ router.post('/submitDiagnosis', (req, res) => {
   
   var updateDiagnosisQuery = "UPDATE Diagnose SET diagnosis=?, prescription=?  WHERE appt=?;";
   db.query(updateDiagnosisQuery, [diagnosis, prescription, id], function (error, results) {
+    if (error) {
+      console.error("Error updating diagnosis:", error);
+      res.status(500).send("Error updating diagnosis.");
+      return;
+    }
+
+    var updateAppointmentQuery = "UPDATE Appointment SET status='Done' WHERE id=?";
+    db.query(updateAppointmentQuery, [id], function (error, results) {
       if (error) {
-          console.error("Error updating diagnosis:", error);
-          res.status(500).send("Error updating diagnosis.");
-          return;
+        console.error("Error updating appointment status:", error);
+        res.status(500).send("Error updating appointment status.");
+        return;
       }
 
-      var updateAppointmentQuery = "UPDATE Appointment SET status='Done' WHERE id=?";
-      db.query(updateAppointmentQuery, [id], function (error, results) {
-          if (error) {
-              console.error("Error updating appointment status:", error);
-              res.status(500).send("Error updating appointment status.");
-              return;
-          }
+      var getEmailQuery = "SELECT doctor AS email FROM Diagnose WHERE appt=?";
+      db.query(getEmailQuery, [id], function (error, results) {
+        if (error) {
+          console.error("Error fetching email:", error);
+          res.status(500).send("Error fetching email.");
+          return;
+        }
 
-          var getEmailQuery = "SELECT email_doctor AS email FROM Diagnose WHERE appt=?";
-          db.query(getEmailQuery, [id], function (error, results) {
-              if (error) {
-                  console.error("Error fetching email:", error);
-                  res.status(500).send("Error fetching email.");
-                  return;
-              }
-
-              var email = results[0].email;
-              res.redirect('/viewAppointments?email=' + email);
-          });
+        var email = results[0].email;
+        req.flash('success', 'Submitted the Diagnosis successfully!');
+        res.redirect('/viewAppointments?email=' + email);
       });
+    });
   });
 });
 
 
-router.get('/viewPatients?email', (req,res)=>{              //added today 04/04/2024
+router.get('/viewPatients', (req,res)=>{              //added today 04/04/2024
   var email_id = req.query.email;   //check this is working or not without JsonStringify
   console.log(email_id);
+  var statement = `SELECT name AS 'Name', PatientsFillHistory.history AS 'ID', email FROM Patient,PatientsFillHistory WHERE Patient.email = PatientsFillHistory.patient AND Patient.email IN (SELECT patient from PatientsAttendAppointments  NATURAL JOIN Diagnose WHERE doctor="${email_id}")`;
+  db.query(statement, (error, results) => {
+    if (error) {
+      console.error('Error fetching patients:', error);
+      res.status(500).send('Error fetching patients');
+    } else {
+      console.log(results);
+      res.render('patient_info', { patients: results });
+    }
+  });
 });
+
+
+router.get('/viewPatients2', (req, res) => {
+  var name = req.query.name; // Get the name from the query parameter or default to empty
+  let statement =`SELECT DISTINCT Patient.name AS Name, PatientsFillHistory.history AS ID, Patient.email FROM Patient JOIN PatientsAttendAppointments ON PatientsAttendAppointments.patient = Patient.email JOIN Appointment ON PatientsAttendAppointments.appt = Appointment.id JOIN Diagnose ON Diagnose.appt = Appointment.id JOIN PatientsFillHistory ON PatientsFillHistory.patient = Patient.email WHERE Patient.name = "${name}";`;
+  db.query(statement, (error, results) => {
+      if (error) {
+          console.error('Error fetching patients:', error);
+          res.status(500).send('Error fetching patients');
+      } else {
+          console.log(results);
+          res.render('patient_info', { patients: results });
+      }
+  });
+});
+
 
 router.get('/Doc_settings', (req,res)=>{   //added today 04/04/2024
   var email_id=req.query.email;
   console.log("setting",email_id)
   res.render('settings_doc', {email: email_id} );
 })
+
 
 router.post('/changePasswordDoc', (req,res)=>{  //added today 04/04/2024
   console.log("Requesting DB From")
@@ -676,18 +787,23 @@ router.post('/changePasswordDoc', (req,res)=>{  //added today 04/04/2024
       }
       //res.redirect('/'); 
       // Redirect to login page on success  AND add flash mesage of sucess and send msg you will be redirected to login page in 3sec
-      res.sendFile(path.join(__dirname, '../public/patient_login.html'));
+      req.flash('success', 'Changed Password  successfully!');
+      // res.sendFile(path.join(__dirname, '../public/doctor_login.html'));
+      res.render('doctor_login');
       // res.json({ success: true, message: 'Password updated successfully' });
     })
   });  
 });
+
 
 router.get('/signout',(req,res)=>{  //added today 04/04/2024    working perfect make it separate for doctor and patient
   req.session.destroy((err) => {
     if (err) {
       console.error('Error destroying session:', err);
     }
-    res.send("logged out") // Redirect to the login page after signout
+    req.flash('success', 'logged out successfully!');
+    res.render('index');
+    // res.sendFile(path.join(__dirname, '../public/index.html')); // Redirect to the login page after signout
   });
 })
 

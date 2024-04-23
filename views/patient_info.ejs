@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Medical History</title>
+    <style>
+        body {
+            font-family: 'Lato', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+    
+        header {
+            background-color: #2c3e50;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+    
+        .container {
+            padding-top: 60px;
+            margin: 20px auto;
+            width: 80%;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 150px;
+        }
+    
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+    
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+    
+        th {
+            background-color: #f2f2f2;
+        }
+    
+        .profile-cell, .profile-header {
+            text-align: right;
+        }
+    
+        .search-bar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+    
+        input[type="text"], button {
+            padding: 10px;
+            margin-right: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+    
+        button, .button {
+            background-color: #2c3e50;
+            color: white;
+            padding: 8px 12px;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            display: inline-block;
+            text-align: center;
+            cursor: pointer;
+        }
+    
+        button:hover, .button:hover {
+            background-color: #1a1f2b;
+        }
+    
+        a.button {
+            text-decoration: none;
+            color: white;
+        }
+    
+        .flash-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            width: 300px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out forwards;
+        }
+    
+        @keyframes slideIn {
+            from { right: -320px; }
+            to { right: 20px; }
+        }
+    
+        .alert {
+            padding: 10px;
+            color: #fff;
+            text-align: center;
+            margin: 0;
+        }
+    
+        .alert-danger {
+            background-color: #e53e3e;
+        }
+    
+        .alert-success {
+            background-color: #38a169;
+        }
+    
+        .timer-strip {
+            height: 4px;
+            background-color: #2c3e50;
+            width: 100%;
+            animation: decreaseWidth 4.5s linear forwards;
+        }
+    
+        @keyframes decreaseWidth {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+    </style>
+    
+</head>
+<body>
+    <header>
+        <h1>HMS</h1>
+    </header>
+    <% if (messages.error || messages.success) { %>
+        <div id="flash-message" class="flash-message">
+            <% if (messages.error) { %>
+                <div class="alert alert-danger"><%= messages.error %></div>
+            <% } %>
+            <% if (messages.success) { %>
+                <div class="alert alert-success"><%= messages.success %></div>
+            <% } %>
+            <div class="timer-strip"></div>
+        </div>
+    <% } %>
+
+    <div class="container">
+        <form class="search-bar" action="/viewPatients2?email=" method="get">
+            <input type="text" name="name" placeholder="Enter name" required>
+            <button type="submit">Search</button>
+        </form>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th class="profile-header">Profile</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% patients.forEach(function(patient) { %>
+                    <tr>
+                        <td><%= patient.Name %> <%= patient.email %></td>
+                        <td class="profile-cell">
+                            <a href="/viewMedicalHistory?email=<%= patient.email %>" class="button">Medical Profile</a>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+    <script>
+        window.onload = function() {
+             const flashMessage = document.getElementById('flash-message');
+                 if (flashMessage) {
+                     setTimeout(function() {
+                     flashMessage.style.opacity = '0';
+                     setTimeout(function() {
+                         flashMessage.style.display = 'none';
+                     }, 500); // Wait an additional 500ms to completely hide after fading out
+                 }, 5000);  // 5000 milliseconds = 5 seconds
+             }
+         };
+     </script>
+</body>
+</html>

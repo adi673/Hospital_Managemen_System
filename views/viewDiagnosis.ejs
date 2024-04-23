@@ -5,52 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HMS</title>
     <style>
+        /* Basic styling */
         body {
             font-family: 'Lato', sans-serif;
             margin: 0;
             padding: 0;
             background-color: #f4f4f4;
         }
+    
+        /* Header styling */
         header {
             background-color: #2c3e50;
             color: #ffffff;
-            padding: 20px 0; /* Centered padding */
+            padding: 20px 0; /* Centered vertical padding */
             position: fixed;
             width: 100%;
             top: 0;
             z-index: 1000;
-            text-align: center; /* Center align the text */
+            text-align: center;
         }
+    
         header h3 {
             margin: 0;
             font-size: 24px;
         }
+    
+        /* Container for content */
         .container {
-            padding-top: 0px; /* Increased top padding to avoid header overlap */
+            padding-top: 70px; /* Adjusted top padding to prevent overlap with fixed header */
             width: 90%; /* Responsive width */
             max-width: 960px;
-            margin: auto;
+            margin: auto; /* Center aligning the container */
         }
+    
+        /* Panel styling for content separation */
         .panel {
             background-color: #ffffff;
             padding: 50px;
             margin-top: 40px;
             border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
+    
+        /* Table styling for data presentation */
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
         }
+    
         th, td {
             padding: 12px;
             text-align: left;
             border-bottom: 1px solid #dddddd;
         }
+    
         th {
             background-color: #f2f2f2;
         }
+    
+        /* Button styling for interactive elements */
         .button {
             display: inline-block;
             background-color: #2c3e50;
@@ -60,10 +74,58 @@
             border-radius: 4px;
             transition: background-color 0.3s;
         }
+    
         .button:hover {
-            background-color: #1a1f2b;
+            background-color: #1a1f2b; /* Darker blue on hover */
+        }
+    
+        /* Flash message styling for notifications */
+        .flash-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            width: 300px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out forwards;
+        }
+    
+        @keyframes slideIn {
+            from { right: -320px; }
+            to { right: 20px; }
+        }
+    
+        .alert {
+            padding: 10px;
+            color: #fff;
+            text-align: center;
+            margin: 0;
+        }
+    
+        .alert-danger {
+            background-color: #e53e3e; /* A deep red */
+        }
+    
+        .alert-success {
+            background-color: #38a169; /* A rich green */
+        }
+    
+        /* Timer strip animation */
+        .timer-strip {
+            height: 4px;
+            background-color: #2c3e50;
+            width: 100%;
+            animation: decreaseWidth 4.5s linear forwards;
+        }
+    
+        @keyframes decreaseWidth {
+            from { width: 100%; }
+            to { width: 0%; }
         }
     </style>
+    
 </head>
 <body>
     <header>
@@ -71,6 +133,18 @@
             <a href="/" style="color: inherit; text-decoration: inherit;"><h3>HMS</h3></a>
         </div>
     </header>
+    <% if (messages.error || messages.success) { %>
+        <div id="flash-message" class="flash-message">
+            <% if (messages.error) { %>
+                <div class="alert alert-danger"><%= messages.error %></div>
+            <% } %>
+            <% if (messages.success) { %>
+                <div class="alert alert-success"><%= messages.success %></div>
+            <% } %>
+            <div class="timer-strip"></div>
+        </div>
+    <% } %>
+
     <div class="container">
         <div class="flash-card">
             <h3>Appointment Details</h3>
@@ -97,5 +171,18 @@
         </div>
         <hr />
     </div>
+    <script>
+        window.onload = function() {
+             const flashMessage = document.getElementById('flash-message');
+                 if (flashMessage) {
+                     setTimeout(function() {
+                     flashMessage.style.opacity = '0';
+                     setTimeout(function() {
+                         flashMessage.style.display = 'none';
+                     }, 500); // Wait an additional 500ms to completely hide after fading out
+                 }, 5000);  // 5000 milliseconds = 5 seconds
+             }
+         };
+     </script>
 </body>
 </html>

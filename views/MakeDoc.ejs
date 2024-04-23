@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Registration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            font-family: 'Lato', sans-serif;
+            animation: fadeIn 2.5s ease-in;
+        }
+    
+        .app-bar {
+            background-color: #2c3e50; /* Dark blue color */
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+            font-family: 'Arial Black', sans-serif;
+        }
+    
+        .header-title {
+            color: #ffffff;
+            text-decoration: none;
+        }
+    
+        .form-container {
+            width: 80%;
+            max-width: 600px;
+            margin: 120px auto;
+            padding: 50px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            animation: slideInUp 2.5s ease-in-out;
+        }
+    
+        .form-header {
+            color: #2c3e50;
+            font-size: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    
+        .registration-form label {
+            display: block;
+            margin-bottom: 5px;
+        }
+    
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+    
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #000000;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+    
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+    
+        .cancel-button,
+        .submit-button {
+            width: 48%;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.3s, color 0.3s;
+        }
+    
+        .cancel-button:hover,
+        .submit-button:hover {
+            background-color: #1a1f2b;
+        }
+    
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    
+        @keyframes slideInUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .flash-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            width: 300px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        @keyframes slideIn {
+            from { right: -320px; }
+            to { right: 20px; }
+        }
+
+        .alert {
+            padding: 10px;
+            color: #fff;
+            text-align: center;
+            margin: 0;
+        }
+
+        .alert-danger {
+            background-color: #e53e3e; /* A deep red */
+        }
+
+        .alert-success {
+            background-color: #38a169; /* A rich green */
+        }
+
+        .timer-strip {
+            height: 4px;
+            background-color: #2c3e50;
+            /* background-color: #FFD700 ; */
+            width: 100%;
+            animation: decreaseWidth 4.5s linear forwards;
+        }
+
+        @keyframes decreaseWidth {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+    </style>
+    
+</head>
+<body>
+    <header class="app-bar">
+        <h1>HMS<h1>
+    </header>
+    <% if (messages.error || messages.success) { %>
+        <div id="flash-message" class="flash-message">
+            <% if (messages.error) { %>
+                <div class="alert alert-danger"><%= messages.error %></div>
+            <% } %>
+            <% if (messages.success) { %>
+                <div class="alert alert-success"><%= messages.success %></div>
+            <% } %>
+            <div class="timer-strip"></div>
+        </div>
+    <% } %>
+
+    <div class="form-container">
+        <p class="form-header">Doctor's registration form:</p>
+        <form action="/submitDoctorForm" method="post" class="registration-form">
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" name="firstName" placeholder="Please enter your first name." required>
+            
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" name="lastName" placeholder="Please enter your last name." required>
+            
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="Please enter your email." required>
+            
+            <label for="schedule">Schedule No</label>
+            <input type="text" id="schedule" name="schedule" placeholder="Please enter schedule number" required>
+            
+            <label for="gender">Gender</label>
+            <input type="text" id="gender" name="gender" placeholder="Female or Male" required>
+            
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Please enter your password." required>
+            
+            <div class="button-container">
+                <button type="reset" class="cancel-button">Cancel</button>
+                <button type="submit" class="submit-button">Sign Up</button>
+            </div>
+        </form>
+    </div>
+    <script>
+        window.onload = function() {
+             const flashMessage = document.getElementById('flash-message');
+                 if (flashMessage) {
+                     setTimeout(function() {
+                     flashMessage.style.opacity = '0';
+                     setTimeout(function() {
+                         flashMessage.style.display = 'none';
+                     }, 500); // Wait an additional 500ms to completely hide after fading out
+                 }, 5000);  // 5000 milliseconds = 5 seconds
+             }
+         };
+     </script>
+</body>
+</html>

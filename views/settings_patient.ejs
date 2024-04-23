@@ -4,7 +4,126 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HMS Settings</title>
-    <link rel="stylesheet" href="/stylesheets/Settings.css">
+    <!-- <link rel="stylesheet" href="/stylesheets/Settings.css"> -->
+    <style>
+        /* General Styles */
+        body, h1, h3 {
+            margin: 0;
+            padding: 0;
+        }
+    
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+    
+        /* App Bar Styles */
+        .app-bar {
+            background-color: #2c3e50; /* Dark blue color */
+            padding: 20px;
+            color: #ffffff;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+    
+        /* Main Container Styles */
+        .main-container {
+            color: #2c3e50;
+            padding: 20px;
+            margin-top: 80px; /* To accommodate the fixed header */
+        }
+    
+        /* Heading Styles */
+        h1, h3 {
+            color: #2c3e50;
+        }
+    
+        /* Form Styles */
+        form {
+            margin-top: 20px;
+        }
+    
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333333; /* Darker color for better contrast */
+        }
+    
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: none;
+            border-bottom: 1px solid #2c3e50; /* Dark blue color for the bottom border */
+            background-color: transparent;
+            font-size: 16px;
+        }
+    
+        /* Button Styles */
+        button {
+            margin-top: 30px;
+            padding: 12px 24px;
+            background-color: #2c3e50; /* Dark blue color */
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s; /* Smooth transition for hover effect */
+        }
+    
+        button:hover {
+            background-color: #34495e; /* Darker blue color on hover */
+        }
+    
+        /* Notification Message Styles */
+        .flash-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            width: 300px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out forwards;
+        }
+    
+        @keyframes slideIn {
+            from { right: -320px; }
+            to { right: 20px; }
+        }
+    
+        .alert {
+            padding: 10px;
+            color: #fff;
+            text-align: center;
+            margin: 0;
+        }
+    
+        .alert-danger {
+            background-color: #e53e3e; /* A deep red */
+        }
+    
+        .alert-success {
+            background-color: #38a169; /* A rich green */
+        }
+    
+        .timer-strip {
+            height: 4px;
+            background-color: #2c3e50;
+            width: 100%;
+            animation: decreaseWidth 4.5s linear forwards;
+        }
+    
+        @keyframes decreaseWidth {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+    </style>
+    
 </head>">
 </head>
 <body>
@@ -13,6 +132,17 @@
             <h1>HMS</h1>
         </a>
     </header>
+    <% if (messages.error || messages.success) { %>
+        <div id="flash-message" class="flash-message">
+            <% if (messages.error) { %>
+                <div class="alert alert-danger"><%= messages.error %></div>
+            <% } %>
+            <% if (messages.success) { %>
+                <div class="alert alert-success"><%= messages.success %></div>
+            <% } %>
+            <div class="timer-strip"></div>
+        </div>
+    <% } %>
     <div class="main-container">
         <h3>Password Change <%= email %> </h3>  <!-- remove email later. it is just for testing -->
         <form id="password-change-form" action="changePasswordPatient?email=<%= email %>" method="post">
@@ -24,6 +154,18 @@
             <button type="submit" id="changePasswordBtn">Change Password</button>
         </form>
     </div>
-    
+    <script>
+        window.onload = function() {
+             const flashMessage = document.getElementById('flash-message');
+                 if (flashMessage) {
+                     setTimeout(function() {
+                     flashMessage.style.opacity = '0';
+                     setTimeout(function() {
+                         flashMessage.style.display = 'none';
+                     }, 500); // Wait an additional 500ms to completely hide after fading out
+                 }, 5000);  // 5000 milliseconds = 5 seconds
+             }
+         };
+     </script>
 </body>
 </html>
