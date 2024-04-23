@@ -9,6 +9,8 @@ const bodyParser = require('body-parser');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+const flash = require('express-flash');
+
 
 var app = express();
 // Configure express to use sessions
@@ -17,6 +19,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false
 }));
+app.use(flash());
 // Parse URL-encoded bodies (as sent by HTML forms)
 app.use(bodyParser.urlencoded({ extended: true }));
 

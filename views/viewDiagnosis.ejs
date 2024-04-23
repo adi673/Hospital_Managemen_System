@@ -11,49 +11,57 @@
             padding: 0;
             background-color: #f4f4f4;
         }
-        .container {
-            margin: auto;
-            max-width: 600px;
-            padding: 20px;
-        }
-        .flash-card {
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        .flash-card table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .flash-card th, .flash-card td {
-            padding: 12px;
-            border-bottom: 1px solid #dddddd;
-        }
-        .flash-card th {
-            text-align: left;
-            background-color: #f2f2f2;
-        }
-        .flash-card hr {
-            margin-top: 20px;
-            border: none;
-            border-top: 1px solid #dddddd;
-        }
-        .flash-card h3 {
-            margin: 0;
-            color: #333333;
-            text-align: center;
-        }
         header {
-            padding: 20px;
-            background-color: #000000;
-            border-radius: 8px 8px 0 0;
+            background-color: #2c3e50;
+            color: #ffffff;
+            padding: 20px 0; /* Centered padding */
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            text-align: center; /* Center align the text */
         }
         header h3 {
             margin: 0;
+            font-size: 24px;
+        }
+        .container {
+            padding-top: 0px; /* Increased top padding to avoid header overlap */
+            width: 90%; /* Responsive width */
+            max-width: 960px;
+            margin: auto;
+        }
+        .panel {
+            background-color: #ffffff;
+            padding: 50px;
+            margin-top: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dddddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .button {
+            display: inline-block;
+            background-color: #2c3e50;
             color: #ffffff;
-            text-align: center;
+            padding: 8px 12px;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #1a1f2b;
         }
     </style>
 </head>

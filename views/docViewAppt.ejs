@@ -6,63 +6,78 @@
     <title>HMS</title>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Lato', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f5f5f5;
-        }
-        .app-bar {
-            background: #000000;
-            padding: 20px;
-            color: #ffffff;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1;
-        }
-        .container {
-            margin-top: 80px; /* Adjust this value to match the height of your app bar */
-            width: 80%;
-            margin-left: auto;
-            margin-right: auto;
-            padding-top: 120px; /* Adjust this value to provide space for the fixed header */
-            background-color: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid #dddddd;
-            padding: 12px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-            font-weight: bold;
-        }
-        .button {
-            background-color: #000000;
-            color: #ffffff;
-            border: none;
-            padding: 8px 12px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 14px;
-            cursor: pointer;
-            border-radius: 5px;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        .button:hover {
-            background-color: #ffffff;
-            color: #000000;
-        }
+        /* CSS styles */
+body {
+    font-family: 'Lato', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+}
+
+.app-bar {
+    background: #2c3e50; /* Dark blue color */
+    padding: 20px;
+    color: #ffffff;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+}
+
+.container {
+    margin-top: 80px; /* Adjust this value to match the height of your app bar */
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 0px; /* Adjust this value to provide space for the fixed header */
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+h1{
+    margin: 0;
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    color: #333333; /* Darker color for better contrast */
+}
+
+.button {
+    background-color: #2c3e50; /* Dark blue color */
+    color: #ffffff;
+    border: none;
+    padding: 8px 12px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.button:hover {
+    background-color: #34495e; /* Darker blue color on hover */
+}
+
     </style>
 </head>
 <body>

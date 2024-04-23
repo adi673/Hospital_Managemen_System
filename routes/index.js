@@ -11,7 +11,7 @@ const res = require('express/lib/response');
 const moment = require('moment');
 const axios = require('axios');
 const fetch = require('fetch');
-// Middleware
+
 // app.use(bodyParser.urlencoded({ extended: true }));
 
 ap.use(express.urlencoded({ extended: true }));
@@ -382,329 +382,135 @@ router.post('/PasswordPatient', (req,res)=>{  //added today 04/04/2024
 });
 
 
+router.post('/schedulereq', (req, res) => {
+  var email_id = req.query.mail_id;
+  var date = req.body.date;
+  const dateString = new Date(date);
+  const dayOfWeekNumber = dateString.getDay();
+  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const dayOfWeekName = days[dayOfWeekNumber];
+  var time = req.body.time;
+  var doc = req.body.doctor;
+  var concerns = req.body.concerns;
+  var symptoms = req.body.symptoms;
+
+
+  console.log('sc', typeof(email_id));
+  console.log("try schedule",email_id,dateString,time,concerns,symptoms,doc,dayOfWeekName,doc);
+
+  let statement = `SELECT * FROM PatientsAttendAppointments 
+  INNER JOIN Appointment ON PatientsAttendAppointments.appt = Appointment.id  
+  WHERE patient = "${email_id}" 
+  AND date = '${date}' 
+  AND starttime = '${time}'`;
+
+  db.query(statement, (err, results1) => { // Changed `res` to `results1` to avoid overshadowing
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: "Database error on first query" });
+    }
+    console.log("result1", results1);
+
+    statement = `SELECT * FROM Diagnose d INNER JOIN Appointment a 
+    ON d.appt = a.id WHERE doctor = "${doc}" AND date = "${date}" AND status = "NotDone" 
+    AND '${time}' >= starttime AND '${time}' < endtime`;
+
+    db.query(statement, (error, results2) => { // Changed `res2` to `results2`
+      if (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Database error on second query" });
+      }
+      console.log("result2", results2);
+
+      let doc2 = doc.trim(); 
+      statement = `SELECT doctor, starttime, endtime, breaktime, day 
+      FROM DocsHaveSchedules 
+      INNER JOIN Schedule ON DocsHaveSchedules.sched = Schedule.id
+      WHERE  day = "${dayOfWeekName}"
+      AND '${time}' >= starttime
+      AND '${time}' < endtime AND doctor = '${doc2}'
+      AND NOT ('${time}' >= breaktime AND '${time}' < ADDTIME(breaktime, '1:00:00'));`;
+      console.log(`Doctor email: '${doc2}'`); 
+      db.query(statement,(error, results3) => { // Renamed `fields` to `results3` for consistency
+        if (error) {
+          console.error(error);
+          return res.status(500).json({ error: "Database error on third query" });
+        }
+        console.log("doc", doc2);
+        console.log("result3", results3);
+
+        
+
+        console.log(results1.length, results2.length, results3.length);
+        if (results1.length > 0 || results2.length > 0 || results3.length === 0) {
+          console.log("Conflicts exist, return all results indicating the conflicts");
+        } else {
+          console.log("No conflicts, '1' or similar could mean 'available'");
+          let statement = 'SELECT id FROM Appointment ORDER BY id DESC LIMIT 1;'
+          db.query(statement, function (error, results, fields) {
+          if (error) throw error;
+          else {
+            let generated_id = results[0].id + 1;
+            console.log("id",generated_id);
+            // return res.json({ id: `${generated_id}` });
+            // var sql_end = CONVERT('${time}', TIME) + INTERVAL 1 HOUR;
+            let sql_try = `INSERT INTO Appointment (id, date, starttime, endtime, status) 
+            VALUES (${generated_id}, '${date}', '${time}', CONVERT('${time}', TIME) + INTERVAL 1 HOUR, "NotDone")`;
+            console.log(sql_try);
+            db.query(sql_try, function (error, results, fields) {
+              if (error){ 
+                throw error;
+              }else{
+                let sql_try = `INSERT INTO Diagnose (appt, doctor, diagnosis, prescription) 
+                VALUES (${generated_id}, "${doc2}", "Not Yet Diagnosed" , "Not Yet Diagnosed")`;
+                console.log(sql_try);
+                db.query(sql_try, function (error, results, fields) {
+                  if (error) throw error;
+                  else{
+                    let sql_try = `INSERT INTO PatientsAttendAppointments (patient, appt, concerns, symptoms) 
+                    VALUES ("${email_id}", ${generated_id}, "${concerns}", "${symptoms}")`;
+                    console.log(sql_try);
+                    db.query(sql_try, function (error, results, fields) {
+                      if (error) throw error;
+                      else{
+                        req.flash('success', 'Appointment scheduled successfully!');
+                        res.redirect(`/viewAppointment?email=${email_id}`);
+                      }
+                    });
+                  }
+                });
+              }  
+            });  
+          };
+  });
+        }
+      });
+    });
+  });
+});
+
+
 
 // router.post('/schedulereq',(req,res)=>{
 //   var email_id=req.query.mail_id;
-//   var  doc_email=req.body.doctor;
-//   var time=req.body.time;
 //   var date=req.body.date;
-//   var formattedDate = moment(date, 'YYYY-MM-DD').format('DD/MM/YYYY');
-  
-//   console.log("tryschedule", email_id, doc_email, time, formattedDate);
-//   let statement = "SELECT * FROM PatientsAttendAppointments, Appointment WHERE patient = ? AND appt = id AND date = ? AND starttime = ?";
-//   db.query(statement,[email_id,formattedDate,time],(err,results)=>{
-//     if(err){
-//       console.error('Error:', err);
-//       return res.status(500).json({ success: false, message: 'Internal server error' });
-//     }else{
-//       cond1 = results;
-//       statement="SELECT * FROM Diagnose d INNER JOIN Appointment a ON d.appt=a.id WHERE doctor= ? AND date=? AND status=? AND ?>= starttime AND ? < endtime";
-//       db.query(statement,[doc_email,formattedDate,"NotDone",time,time],(err,results)=>{
-//         if(err){
-//           console.error('Error:', err);
-//           return res.status(500).json({ success: false, message: 'Internal server error' });
-//         }else{
-//           cond2=results;
-//           statement = "SELECT doctor, starttime, endtime, breaktime, day FROM DocsHaveSchedules  INNER JOIN Schedule ON DocsHaveSchedules.sched=Schedule.id WHERE doctor=? AND day=DAYNAME(?) AND (DATE_ADD(?, INTERVAL +1 HOUR) <= breaktime OR ? >= DATE_ADD(breaktime, INTERVAL +1 HOUR));"
-//           db.query(statement,[doc_email,formattedDate,time,time],(err,results)=>{
-//            if(err){
-//               console.error('Error:', err);
-//               return res.status(500).json({ success: false, message: 'Internal server error' });
-//             }else{
-//               if(results.length){
-//                 results = []
-//               }
-//               else{
-//                 results = [1]
-//               }
-//               console.log(results,cond2);
-              
-//             }
-//           })
-//         }  
-//       })
-
-      
-
-      
-//     }
-    
-//   })
-  
-// })
-
-// router.post('/schedulereq',(req,res)=>{
-//   var email_id=req.query.mail_id;
-//   var  doc_email=req.body.doctor;
+//   const dateString = new Date(date);
+//   const dayOfWeekNumber = dateString.getDay();
+//   const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+//   const dayOfWeekName = days[dayOfWeekNumber];
 //   var time=req.body.time;
-//   var date=req.body.date;
-//   var formattedDate = moment(date, 'YYYY-MM-DD').format('DD/MM/YYYY');
-//   let parsedTime = req.body.time.split(':');
-// let startHour = parseInt(parsedTime[0], 10);
-
-// // Calculate the end hour by adding one hour to the start hour
-// let endHour = startHour + 1;
-
-// // Ensure the end hour is in the correct format (e.g., with leading zero if needed)
-// let formattedEndHour = endHour.toString().padStart(2, '0');
-
-// // Reconstruct the end time string with the calculated end hour and the same minutes
-// let endTime = `${formattedEndHour}:${parsedTime[1]}`;
-//   console.log("tryschedule", email_id, doc_email, time, formattedDate);
-
-//   let statement1 = "SELECT * FROM PatientsAttendAppointments, Appointment WHERE patient = ? AND appt = id AND date = ? AND starttime = ?";
-//   db.query(statement1,[email_id,formattedDate,time],(err,results)=>{
-//     if(err){
-//       console.error('Error:', err);
-//       return res.status(500).json({ success: false, message: 'Internal server error' });
-//     }else{
-//       let cond1 = results;
-
-//       let statement2 = "SELECT * FROM Diagnose d INNER JOIN Appointment a ON d.appt=a.id WHERE doctor= ? AND date=? AND status=? AND ?>= starttime AND ? < endtime";
-//       db.query(statement2,[doc_email,formattedDate,"NotDone",time,time],(err,results)=>{
-//         if(err){
-//           console.error('Error:', err);
-//           return res.status(500).json({ success: false, message: 'Internal server error' });
-//         }else{
-//           let cond2=results;
-
-//           let statement3 = "SELECT doctor, starttime, endtime, breaktime, day FROM DocsHaveSchedules  INNER JOIN Schedule ON DocsHaveSchedules.sched=Schedule.id WHERE doctor=? AND day=DAYNAME(?) AND (DATE_ADD(?, INTERVAL +1 HOUR) <= breaktime OR ? >= DATE_ADD(breaktime, INTERVAL +1 HOUR));";
-//           db.query(statement3,[doc_email,formattedDate,time,time],(err,results)=>{
-//             if(err){
-//               console.error('Error:', err);
-//               return res.status(500).json({ success: false, message: 'Internal server error' });
-//             }else{
-//               let cond3 = results;
-//               if(cond3.length > 0){
-//                 // Appointment clashes with doctor's schedule
-//                 return res.status(200).json({ success: false, message: 'Appointment Clash! Try another doctor or date/time' });
-//               } else if (cond1.length > 0) {
-//                 // Appointment clashes with patient's existing appointment
-//                 return res.status(200).json({ success: false, message: 'Appointment Clash! You already have an appointment at this time.' });
-//               } else if (cond2.length > 0) {
-//                 // Appointment clashes with doctor's existing appointment
-//                 return res.status(200).json({ success: false, message: 'Appointment Clash! Doctor is not available at this time.' });
-//               } else {
-//                 // Proceed with scheduling the appointment
-//                 let statement4 = "INSERT INTO Appointment (date, starttime, endtime, status) VALUES (?, ?, ?, ?)";
-//                 db.query(statement4,[formattedDate,time,endTime,"NotDone"],(err,results)=>{
-//                   if(err){
-//                     console.error('Error:', err);
-//                     return res.status(500).json({ success: false, message: 'Internal server error' });
-//                   }else{
-//                     let apptId = results.insertId;
-//                     let statement5 = "INSERT INTO Diagnose (appt, doctor, diagnosis, prescription) VALUES (?, ?, ?, ?)";
-//                     db.query(statement5,[apptId,doc_email,"Not Yet Diagnosed","Not Yet Diagnosed"],(err,results)=>{
-//                       if(err){
-//                         console.error('Error:', err);
-//                         return res.status(500).json({ success: false, message: 'Internal server error' });
-//                       }else{
-//                         return res.status(200).json({ success: true, message: 'Appointment successfully scheduled!' });
-//                       }
-//                     });
-//                   }
-//                 });
-//               }
-//             }
-//           });
-//         }  
-//       });
-//     }
-//   });
+//   var doc=req.body.doctor;
+//   var concerns=req.body.concerns;
+//   var symptoms=req.body.symptoms;
+//   console.log('sc',typeof(email_id));
+//   console.log("try schedule",email_id,dateString,time,concerns,symptoms,doc,dayOfWeekName);
+ 
 // });
 
 
 
-// Check if appointment exists
-router.get('/checkIfApptExists', (req, res) => {
-  let cond1, cond2, cond3 = ""
-  let params = req.query;
-  let email = params.email;
-  let doc_email = params.docEmail;
-  let startTime = params.startTime;
-  let date = params.date;
-  let ndate = new Date(date).toLocaleDateString().substring(0, 10)
-  let sql_date = `STR_TO_DATE('${ndate}', '%d/%m/%Y')`;
-  let sql_start = `CONVERT('${startTime}', TIME)`;
-  let statement = `SELECT * FROM PatientsAttendAppointments, Appointment  
-  WHERE patient = "${email}" AND
-  appt = id AND
-  date = ${sql_date} AND
-  starttime = ${sql_start}`
-  console.log(statement)
-  con.query(statement, function (error, results, fields) {
-      if (error) throw error;
-      else {
-          cond1 = results;
-          statement=`SELECT * FROM Diagnose d INNER JOIN Appointment a 
-          ON d.appt=a.id WHERE doctor="${doc_email}" AND date=${sql_date} AND status="NotDone" 
-          AND ${sql_start} >= starttime AND ${sql_start} < endtime`
-          console.log(statement)
-          con.query(statement, function (error, results, fields) {
-              if (error) throw error;
-              else {
-                  cond2 = results;
-                  statement = `SELECT doctor, starttime, endtime, breaktime, day FROM DocsHaveSchedules 
-                  INNER JOIN Schedule ON DocsHaveSchedules.sched=Schedule.id
-                  WHERE doctor="${doc_email}" AND 
-                  day=DAYNAME(${sql_date}) AND 
-                  (DATE_ADD(${sql_start},INTERVAL +1 HOUR) <= breaktime OR ${sql_start} >= DATE_ADD(breaktime,INTERVAL +1 HOUR));`
-                  console.log(statement)
-                  con.query(statement, function (error, results, fields) {
-                      if (error) throw error;
-                      else {
-                          if(results.length){
-                              results = []
-                          }
-                          else{
-                              results = [1]
-                          }
-                          return res.json({
-                              data: cond1.concat(cond2,results)
-                          })
-                      };
-                  });
-              };
-          });
-      };
-  });
-});
-
-// Schedule appointment
-router.get('/schedule', (req, res) => {
-  let params = req.query;
-  let time = params.time;
-  let date = params.date;
-  let id = params.id;
-  let endtime = params.endTime;
-  let concerns = params.concerns;
-  let symptoms = params.symptoms;
-  let doctor = params.doc;
-  let ndate = new Date(date).toLocaleDateString().substring(0, 10)
-  let sql_date = `STR_TO_DATE('${ndate}', '%d/%m/%Y')`;
-  let sql_start = `CONVERT('${time}', TIME)`;
-  let sql_end = `CONVERT('${endtime}', TIME)`;
-  let sql_try = `INSERT INTO Appointment (id, date, starttime, endtime, status) 
-  VALUES (${id}, ${sql_date}, ${sql_start}, ${sql_end}, "NotDone")`;
-  console.log(sql_try);
-  con.query(sql_try, function (error, results, fields) {
-      if (error) throw error;
-      else {
-          let sql_try = `INSERT INTO Diagnose (appt, doctor, diagnosis, prescription) 
-          VALUES (${id}, "${doctor}", "Not Yet Diagnosed" , "Not Yet Diagnosed")`;
-          console.log(sql_try);
-          con.query(sql_try, function (error, results, fields) {
-              if (error) throw error;
-              else{
-                  return res.json({
-                      data: results
-                  })
-              }
-          });
-      }
-  });
-});
-
-// Generate UID for appointment
-router.get('/genApptUID', (req, res) => {
-  let statement = 'SELECT id FROM Appointment ORDER BY id DESC LIMIT 1;'
-  con.query(statement, function (error, results, fields) {
-      if (error) throw error;
-      else {
-          let generated_id = results[0].id + 1;
-          return res.json({ id: `${generated_id}` });
-      };
-  });
-});
-
-// Schedule appointment request
-router.post('/schedulereq', async (req, res) => {
-  try {
-      const { theTime, endTime, theDate, theDoc, theConcerns, theSymptoms } = req.body;
-
-      // Check if appointment exists
-      const apptExistsResponse = await fetch(`http://localhost:3001/checkIfApptExists?startTime=${theTime}&date=${theDate}&docEmail=${theDoc}`);
-      const apptExistsData = await apptExistsResponse.json();
-      const apptExists = apptExistsData.data[0];
-
-      if (apptExists) {
-          return res.status(400).json({ message: "Appointment Clash! Try another doctor or date/time" });
-      }
-
-      // Generate appointment UID
-      const uidResponse = await fetch('http://localhost:3001/genApptUID');
-      const uidData = await uidResponse.json();
-      const gen_uid = uidData.id;
-
-      // Schedule appointment
-      const scheduleResponse = await fetch(`http://localhost:3001/schedule?time=${theTime}&endTime=${endTime}&date=${theDate}&concerns=${theConcerns}&symptoms=${theSymptoms}&id=${gen_uid}&doc=${theDoc}`);
-
-      if (!scheduleResponse.ok) {
-          throw new Error("Failed to schedule appointment");
-      }
-
-      return res.json({ message: "Appointment successfully scheduled!" });
-  } catch (error) {
-      console.error("Error scheduling appointment:", error);
-      return res.status(500).json({ message: "Internal server error" });
-  }
-});
 
 
-
-
-
-router.post('/schedulereq', (req, res) => {
-  var email_id = req.query.mail_id;
-  var doc_email = req.body.doctor;
-  var time = req.body.time;
-  var date = req.body.date;
-  var formattedDate = moment(date, 'YYYY-MM-DD').format('DD/MM/YYYY');
-
-  console.log("Request received - tryschedule:", email_id, doc_email, time, formattedDate);
-
-  // Parse hr string to int and add one hour to start hour
-  let startHour = parseInt(time.split(':')[0], 10);
-  let endHour = startHour + 1;
-  let endTime = `${endHour}:00`;
-
-  console.log("End Time:", endTime);
-  console.log("Date:", formattedDate);
-  console.log("Time:", time);
-
-  // Check if the doctor email exists in the doctor table
-  let checkDoctorQuery = "SELECT * FROM doctor WHERE email = ?";
-  db.query(checkDoctorQuery, [doc_email], (err, doctorResults) => {
-      if (err) {
-          console.error('Error checking doctor email:', err);
-          return res.status(500).json({ success: false, message: 'Internal server error' });
-      }
-      if (doctorResults.length === 0) {
-          console.error('1Doctor email does not exist:', doc_email);
-          return res.status(400).json({ success: false, message: '2Doctor email does not exist' });
-      }
-
-      // Insert values into Diagnose table
-      let insertStatement = "INSERT INTO Diagnose (appt, doctor, diagnosis, prescription) VALUES (?, ?, ?, ?)";
-      db.query(insertStatement, ['Replace with value', doc_email, 'Replace with diagnosis', 'Replace with prescription'], (err, results) => {
-          if (err) {
-              // Check if the error is due to foreign key constraint violation
-              if (err.code === 'ER_NO_REFERENCED_ROW_2') {
-                  console.error('1Doctor email does not exist in the doctor table:', doc_email);
-                  // Handle the error appropriately (e.g., return a response indicating failure)
-                  return res.status(400).json({ success: false, message: 'Doctor email does not exist' });
-              } else {
-                  console.error('Error inserting into Diagnose table:', err);
-                  return res.status(500).json({ success: false, message: 'Internal server error' });
-              }
-          } else {
-              console.log('Successfully inserted into Diagnose table:', results);
-              // Respond with success message
-              return res.status(200).json({ success: true, message: 'Appointment scheduled successfully!' });
-          }
-      });
-  });
-});
 
 
 router.post('/login_doctor', passport.authenticate("doctor",{   //added today 04/04/2024
