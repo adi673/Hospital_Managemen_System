@@ -117,7 +117,7 @@ router.post('/login_patient', passport.authenticate("patient",{
   console.log(password);
   const dataToPass = { email_id: email};
   console.log(dataToPass);
-  req.flash('success', 'logged in successfully!');
+  //req.flash('success', 'logged in successfully!');
  res.redirect(`/dashboard_patient?data=${encodeURIComponent(JSON.stringify(dataToPass))}`);
 });
 
@@ -230,7 +230,37 @@ router.get('/Add_Doctor', (req, res) => {
 });
 
 
-router.post('/submitDoctorForm', (req, res) => { 
+// router.post('/submitDoctorForm', (req, res) => { 
+//   let params = req.body;
+//   let name = params.name + " " + params.lastname;
+//   let email = params.email;
+//   let password = params.password;
+//   let gender = params.gender;
+//   let schedule = params.schedule;
+//   console.log(params);
+//   let sql_statement = `INSERT INTO Doctor (email, gender, password, name) 
+//                        VALUES ` + `("${email}", "${gender}", "${password}", "${name}")`;
+//   console.log(sql_statement);
+//   db.query(sql_statement, function (error, results, fields) {
+//     if (error) throw error;
+//     else {
+//       let sql_statement = `INSERT INTO DocsHaveSchedules (sched, doctor) 
+//                        VALUES ` + `(${schedule}, "${email}")`;
+//       console.log(sql_statement);
+//       db.query(sql_statement, function(error){
+//         if (error) throw error;
+//         else {
+//           req.flash('success', 'Doctor created successfully!');
+//           res.render('Admin_options');
+//           // res.sendFile(path.join(__dirname, '../public/Admin_options.html'));
+//         }
+//       })
+//     };
+//   });
+// });
+
+
+router.post('/submitDoctorForm', (req, res) => {
   let params = req.body;
   let name = params.name + " " + params.lastname;
   let email = params.email;
@@ -238,26 +268,38 @@ router.post('/submitDoctorForm', (req, res) => {
   let gender = params.gender;
   let schedule = params.schedule;
   console.log(params);
-  let sql_statement = `INSERT INTO Doctor (email, gender, password, name) 
-                       VALUES ` + `("${email}", "${gender}", "${password}", "${name}")`;
-  console.log(sql_statement);
-  db.query(sql_statement, function (error, results, fields) {
-    if (error) throw error;
-    else {
-      let sql_statement = `INSERT INTO DocsHaveSchedules (sched, doctor) 
-                       VALUES ` + `(${schedule}, "${email}")`;
-      console.log(sql_statement);
-      db.query(sql_statement, function(error){
-        if (error) throw error;
-        else {
-          req.flash('success', 'Doctor created successfully!');
-          res.render('Admin_options');
-          // res.sendFile(path.join(__dirname, '../public/Admin_options.html'));
-        }
-      })
-    };
+  // Use parameterized queries to prevent SQL injection
+  let sql = "INSERT INTO Doctor (email, gender, password, name) VALUES (?, ?, ?, ?)";
+  
+  db.query(sql, [email, gender, password, name], function (error, results) {
+    if (error) {
+      console.error(error); // Log error for debugging
+      if (error.code === 'ER_DUP_ENTRY') {
+        // Handle duplicate entry specifically
+        req.flash('error', 'Cannot create doctor: the email address is already registered.');
+        return res.redirect('/submitDoctorForm'); // Redirect back to form
+      } else {
+        req.flash('error', 'Failed to create doctor due to a database error.');
+        return res.redirect('/submitDoctorForm');
+      }
+    }
+
+    // If doctor is created successfully, proceed with creating the schedule entry
+    let sql2 = "INSERT INTO DocsHaveSchedules (sched, doctor) VALUES (?, ?)";
+    db.query(sql2, [schedule, email], function(error) {
+      if (error) {
+        console.error(error); // Log error for debugging
+        req.flash('error', 'Doctor created, but failed to assign schedule.');
+        return res.redirect('/submitDoctorForm'); // Adjust if necessary
+      }
+      
+      // If everything is fine, flash success and render or redirect
+      req.flash('success', 'Doctor created successfully!');
+      res.render('Admin_options'); // Assuming this is the correct redirection
+    });
   });
- });
+});
+
 
 
 router.get('/dashboard_patient', (req, res) =>{
@@ -269,6 +311,7 @@ router.get('/dashboard_patient', (req, res) =>{
     db.query(query, [email_id], (err, results) => {
       if (err) { return done(err); }
       console.log(results[0].name);
+      req.flash('success', 'logged in successfully!');
       res.render('home', {name: results[0].name, email: email_id})
     });
 });
@@ -359,6 +402,7 @@ router.get('/deleteAppt', (req, res) => {
                       return res.status(500).json({ success: false, message: 'Internal server error' });
                   }
                   console.log('Appointment deleted');
+                  req.flash('success', 'Deleted the appointment successfully!');
                   res.redirect(`/dashboard_patient?data=${encodeURIComponent(JSON.stringify(dataToPass))}`);
               });
           } else {
@@ -398,6 +442,7 @@ router.get('/diagnosis', (req,res)=>{  //check what happens in front end when mu
         return res.status(500).json({ success: false, message: 'Internal server error' });
       }
       console.log("results2",results1[0]);
+      
       res.render('viewDiagnosis', {appointment_id: appt_id, diagnosis: results,doc:results1});
     })
     console.log("diagnosis kutra results",results);
@@ -801,11 +846,11 @@ router.get('/signout',(req,res)=>{  //added today 04/04/2024    working perfect 
     if (err) {
       console.error('Error destroying session:', err);
     }
-    req.flash('success', 'logged out successfully!');
+    // req.flash('success', 'logged out successfully!');
     res.render('index');
     // res.sendFile(path.join(__dirname, '../public/index.html')); // Redirect to the login page after signout
   });
-})
+});
 
 // router.get('/gobackPatientDashboard',(req,res)=>{  //added today 04/04/2024 
 //   var email_id=req.query.email;

@@ -121,7 +121,7 @@
     
         .timer-strip {
             height: 4px;
-            background-color: #2c3e50;
+            background-color: #c1ad28;
             width: 100%;
             animation: decreaseWidth 4.5s linear forwards;
         }
@@ -137,7 +137,17 @@
     <header id="header">
         <a href="/"><h3></h3></a>
     </header>
-
+    <% if (messages.error || messages.success) { %>
+        <div id="flash-message" class="flash-message">
+            <% if (messages.error) { %>
+                <div class="alert alert-danger"><%= messages.error %></div>
+            <% } %>
+            <% if (messages.success) { %>
+                <div class="alert alert-success"><%= messages.success %></div>
+            <% } %>
+            <div class="timer-strip"></div>
+        </div>
+    <% } %>
     <div id="sidebar">
         <a href="/viewMedicalHistory?email=<%= email %>" class="sidebar-button">View Medical History</a>
         <a href="/viewAppointment?email=<%= email %>" class="sidebar-button">View Appointments</a>

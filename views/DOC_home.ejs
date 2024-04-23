@@ -26,13 +26,9 @@
             padding: 20px;
         }
 
-        #header a {
-            color: inherit;
-            text-decoration: inherit;
-        }
-
-        a {
-            text-decoration: none;
+        #header a, a {
+            color: inherit; /* Inherit the text color from the parent element */
+            text-decoration: none; /* No underline */
         }
 
         #sidebar {
@@ -49,10 +45,11 @@
             cursor: pointer;
             transition: background-color 0.3s;
             font-size: 20px;
+            color: inherit; /* Ensures text color is inherited, thus white like its container */
         }
 
         .sidebar-button:hover {
-            background-color: #838080;
+            background-color: #838080; /* Change background on hover, but text color remains consistent */
         }
 
         .sidebar-button:not(:last-child) {
@@ -119,7 +116,7 @@
 
         .timer-strip {
             height: 4px;
-            background-color: #2c3e50;
+            background-color: #FFD700;
             width: 100%;
             animation: decreaseWidth 4.5s linear forwards;
         }
@@ -132,7 +129,7 @@
 </head>
 <body>
     <header id="header">
-        <a href="/"><h3></h3></a>
+        <!-- <a href="/"><h3>HMS</h3></a> -->
     </header>
     <% if (messages.error || messages.success) { %>
         <div id="flash-message" class="flash-message">
