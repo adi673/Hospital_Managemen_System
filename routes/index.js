@@ -842,14 +842,14 @@ router.post('/changePasswordDoc', (req,res)=>{  //added today 04/04/2024
 
 
 router.get('/signout',(req,res)=>{  //added today 04/04/2024    working perfect make it separate for doctor and patient
-  req.session.destroy((err) => {
+  
     if (err) {
       console.error('Error destroying session:', err);
     }
-    // req.flash('success', 'logged out successfully!');
+    //req.flash('success', 'logged out successfully!');
     res.render('index');
     // res.sendFile(path.join(__dirname, '../public/index.html')); // Redirect to the login page after signout
-  });
+  
 });
 
 // router.get('/gobackPatientDashboard',(req,res)=>{  //added today 04/04/2024 

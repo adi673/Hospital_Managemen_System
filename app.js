@@ -17,7 +17,8 @@ var app = express();
 app.use(session({
   secret: 'your_secret_key',
   resave: false,
-  saveUninitialized: false
+  falsesaveUninitialized: false,  // Forces a session that is "uninitialized" to be saved to the store. 
+  cookie: { secure: true }
 }));
 app.use(flash());
 // Parse URL-encoded bodies (as sent by HTML forms)
